@@ -1,0 +1,77 @@
+---
+title: Quickstart
+description: Create an API key and make your first call to the Olaverse API.
+---
+
+import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+Every capability lives behind one base URL:
+
+```text
+https://api.olaverselab.com
+```
+
+<Steps>
+
+1. **Create an API key.** Sign in to the [developer console](https://console.olaverselab.com), open **API keys** and create one. It is shown once, so store it somewhere safe.
+
+2. **Set your environment.**
+
+   ```bash
+   export OLAVERSE_URL="https://api.olaverselab.com"
+   export OLAVERSE_KEY="your-key"
+   ```
+
+3. **Make a call.** This asks whether a customer wants a refund:
+
+   <Tabs syncKey="lang">
+   <TabItem label="curl">
+   ```bash
+   curl -X POST "$OLAVERSE_URL/v1/decide" \
+     -H "Authorization: Bearer $OLAVERSE_KEY" \
+     -H "Content-Type: application/json" \
+     -d '{"state": "I was charged twice, please refund me",
+          "questions": {"refund": {"type": "noul", "instructions": "The customer asks for money back."}}}'
+   ```
+   </TabItem>
+   <TabItem label="Python">
+   ```python
+   import os, requests
+
+   URL = os.environ["OLAVERSE_URL"]
+   HEADERS = {"Authorization": f"Bearer {os.environ['OLAVERSE_KEY']}"}
+
+   def call(path, body):
+       r = requests.post(f"{URL}{path}", json=body, headers=HEADERS, timeout=120)
+       r.raise_for_status()
+       return r.json()
+
+   result = call("/v1/decide", {
+       "state": "I was charged twice, please refund me",
+       "questions": {"refund": {"type": "noul", "instructions": "The customer asks for money back."}},
+   })
+   print(result["answers"]["refund"]["noul"])   # e.g. 0.97
+   ```
+   </TabItem>
+   </Tabs>
+
+</Steps>
+
+The rest of these docs use the small `call` helper above in their Python examples.
+
+<Aside type="tip" title="First call slow?">
+Services start on demand and sleep after 5 idle minutes, so the first call after a quiet spell can take a while. Set your HTTP timeout to about 2 minutes, and [warm services up](/get-started/warm-up/) when you know traffic is coming.
+</Aside>
+
+## What's available
+
+| What you want | Endpoint | Billed per |
+| --- | --- | --- |
+| Typed decisions about a message or record | `POST /v1/decide` | decision |
+| A document as JSON, with a confidence per field | `POST /v1/extract` | document |
+| The language of a text (608 languages) | `POST /v1/language-id` | text |
+| Diacritics and tone marks restored (11 languages) | `POST /v1/diacritize` | 1,000 characters |
+| Search-style questions from a passage (25 languages) | `POST /v1/questions/generate` | passage |
+| What's available | `GET /v1/models` | free |
+
+Each POST endpoint also has a `/batch` version. Every billable response includes a `usage` block in its billing unit.

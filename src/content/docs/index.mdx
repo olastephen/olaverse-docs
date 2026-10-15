@@ -1,0 +1,53 @@
+---
+title: Olaverse API
+description: One API for decisions, document extraction, language identification, diacritic restoration and question generation, built for English and African languages.
+template: splash
+hero:
+  tagline: One API for decisions, document extraction, language identification, diacritics and question generation. Built African-first, open-weight underneath.
+  actions:
+    - text: Quickstart
+      link: /get-started/quickstart/
+      icon: right-arrow
+    - text: Get an API key
+      link: https://console.olaverselab.com
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## What you can build
+
+<CardGrid>
+	<Card title="Decisions" icon="approve-check-circle">
+		Route, flag and score messages, tickets and records. Every option gets a calibrated probability, in English and eight African languages.
+		[Read more →](/api/decisions/)
+	</Card>
+	<Card title="Document extraction" icon="document">
+		Turn receipts, mobile-money messages, letters and forms into JSON, from text or a photo, with a confidence for every field.
+		[Read more →](/api/extraction/)
+	</Card>
+	<Card title="Language identification" icon="translate">
+		Identify 608 languages, including on short, messy user input.
+		[Read more →](/api/language-id/)
+	</Card>
+	<Card title="Diacritic restoration" icon="pencil">
+		Put tone marks, accents and Arabic vowel marks back in 11 languages.
+		[Read more →](/api/diacritics/)
+	</Card>
+	<Card title="Question generation" icon="question-circle">
+		Turn a passage into search-style questions in its own language, across 25 languages.
+		[Read more →](/api/questions/)
+	</Card>
+	<Card title="One key, one base URL" icon="padlock">
+		Every capability sits behind `https://api.olaverselab.com` and the same bearer key.
+		[Authentication →](/get-started/authentication/)
+	</Card>
+</CardGrid>
+
+## Start here
+
+<CardGrid>
+	<LinkCard title="Quickstart" description="Make your first call in a couple of minutes." href="/get-started/quickstart/" />
+	<LinkCard title="Developer console" description="Create API keys, track usage and try every endpoint in the playground." href="https://console.olaverselab.com" />
+</CardGrid>

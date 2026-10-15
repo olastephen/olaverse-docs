@@ -1,0 +1,45 @@
+---
+title: Language identification
+description: Identify the language of a text from 608 languages, built African-first.
+---
+
+<div class="ola-endpoint">
+	<code>POST /v1/language-id</code><code>POST /v1/language-id/batch</code><code>billed per text</code>
+</div>
+
+Identifies 608 languages and holds up on short, messy user input. Powered by [lid-neural-608](https://huggingface.co/olaverse/lid-neural-608) and [lid-lite-608](https://huggingface.co/olaverse/lid-lite-608).
+
+```python
+r = call("/v1/language-id", {"text": "Mo fẹ́ lọ sí ọjà"})
+print(r["language"], r["confidence"])   # yor 0.97
+```
+
+## Request
+
+| Field | Default | Notes |
+| --- | --- | --- |
+| `text` | required | Up to 8,000 characters. |
+| `model` | `lid-neural-608` | `lid-neural-608` is the most accurate; `lid-lite-608` (fastText) is the fastest. |
+| `mode` | `traffic` | `traffic` is for user input, chat and routing: on short text it leans towards the languages people actually use. `coverage` treats every language equally, for building corpora. |
+| `top_k` | `3` | 1 to 25 runner-up languages in `top`. |
+
+## Response
+
+```json
+{
+  "language": "yor", "script": "Latn", "label": "yor_Latn", "language_name": "Yoruba",
+  "confidence": 0.97,
+  "top": [{"label": "yor_Latn", "language": "yor", "score": 0.97},
+          {"label": "ibo_Latn", "language": "ibo", "score": 0.01}],
+  "warnings": [],
+  "model": "lid-neural-608", "mode": "traffic", "usage": {"texts": 1}
+}
+```
+
+- `language` is ISO 639-3, and `label` adds the script (`yor_Latn`, `srp_Cyrl`).
+- `zxx_Zxxx` means no language was found: the text is code, numbers or symbols. A warning says so.
+- `language_name` is filled in for the 25 [question-generation languages](/api/questions/), and is the code otherwise.
+
+## Batch
+
+`POST /v1/language-id/batch` with `"texts": [...]` (up to **256**) returns `{"results": [...]}` in the same order.

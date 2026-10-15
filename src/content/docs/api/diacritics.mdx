@@ -1,0 +1,58 @@
+---
+title: Diacritic restoration
+description: Restore diacritics, tone marks and Arabic vowel marks in 11 languages.
+---
+
+<div class="ola-endpoint">
+	<code>POST /v1/diacritize</code><code>POST /v1/diacritize/batch</code><code>billed per 1,000 characters</code>
+</div>
+
+Puts back diacritics, tone marks and Arabic vowel marks in Yorùbá, Igbo, Hausa, Vietnamese, Polish, Turkish, Portuguese, Spanish, French, Italian and Arabic.
+
+```python
+r = call("/v1/diacritize", {"text": "se eranko naa si gbo o?", "language": "yor"})
+print(r["text"])   # ṣé ẹranko náà sì gbọ́ ọ?
+```
+
+## Which model?
+
+| `model` | Use it when | Runs on |
+| --- | --- | --- |
+| `diacnet-2.0` (default) | You want the best accuracy, or meaning hints for ambiguous words. | GPU |
+| `diacnet-mini-2.0` | You want nearly the same accuracy at half the size. | GPU |
+| `diactag-2.0` | You want the cheapest, fastest option. It never changes a letter, detects the language itself, and can leave unsure characters untouched. | CPU |
+
+## Request
+
+| Field | Default | Applies to | Notes |
+| --- | --- | --- | --- |
+| `text` | required | all | Up to 20,000 characters. |
+| `language` | `auto` | all | `yor`, `ibo`, `hau`, `vie`, `pol`, `tur`, `por`, `spa`, `fra`, `ita`, `ara`, `ara-nocase` (or 2-letter codes), or `auto`. |
+| `case_endings` | `true` | all | Arabic only. `false` leaves word endings unvowelled, as most modern Arabic is written. |
+| `hints` | none | diacnet | Meanings for words whose marks depend on meaning, e.g. `{"ogun": "war"}` (*ogun* "war" vs *ogún* "twenty"). |
+| `aligned` | `true` | diacnet | Keep your letters exactly and take only the model's marks. `false` returns the model's raw output, which may also fix typos. |
+| `min_confidence` | `0` | diactag | 0 to 1. Characters the model is less sure about are left exactly as you typed them. |
+
+## Response
+
+```json
+{"text": "ṣé ẹranko náà sì gbọ́ ọ?", "model": "diacnet-2.0", "language": "yor",
+ "usage": {"characters": 23, "billable_units": 1}}
+```
+
+`billable_units` is the character count in thousands, rounded up.
+
+## Batch
+
+`POST /v1/diacritize/batch` takes up to **64 texts**:
+
+- `texts` replaces `text`.
+- `language` is one code for all texts, or a list with one per text.
+- `hints` is a list with one object (or `null`) per text.
+
+The response is `{"texts": [...]}` in the same order.
+
+```python
+r = call("/v1/diacritize/batch", {"texts": ["se eranko naa", "toi khong biet"],
+                                  "language": ["yor", "vie"], "model": "diactag-2.0"})
+```

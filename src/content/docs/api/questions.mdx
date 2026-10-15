@@ -1,0 +1,46 @@
+---
+title: Question generation
+description: Turn a passage into natural, search-style questions in its own language, across 25 languages.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+<div class="ola-endpoint">
+	<code>POST /v1/questions/generate</code><code>POST /v1/questions/generate/batch</code><code>billed per passage</code>
+</div>
+
+Turns a passage into `n` natural, search-style questions that it answers. Useful for FAQs, study cards and search training data. Powered by [mist-qg-1.5b](https://huggingface.co/olaverse/mist-qg-1.5b).
+
+The questions are always in the **passage's own language**: a Yorùbá passage gives Yorùbá questions. `language` tells the model what language the passage is in; it does not translate.
+
+```python
+r = call("/v1/questions/generate", {
+    "passage": "Ocean tides are caused mainly by the gravitational pull of the Moon on the Earth...",
+    "n": 3, "language": "English"})
+print(r["questions"])
+```
+
+## Request
+
+| Field | Default | Notes |
+| --- | --- | --- |
+| `passage` | required | 1 to 8,000 characters. Works best at paragraph length. |
+| `n` | `3` | 1 to 10 questions. |
+| `language` | `English` | The passage's language: `yor`, `yo` or `Yoruba`, or any of the 25 in [`GET /v1/languages`](/reference/models/). Set it to match the passage. |
+
+## Response
+
+```json
+{"questions": ["What causes ocean tides?", "...", "..."], "language": "eng",
+ "model": "olaverse/mist-qg-1.5b", "warnings": [], "usage": {"generations": 1}}
+```
+
+`warnings` flags a very short passage, or a language the model is less confident in.
+
+<Aside type="tip">
+Don't know the passage's language? Call [`/v1/language-id`](/api/language-id/) on it first and pass the language it returns.
+</Aside>
+
+## Batch
+
+`POST /v1/questions/generate/batch` with `"passages": [...]` (up to **64**, all in the same language) returns `{"results": [[...], [...]]}`.

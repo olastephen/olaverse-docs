@@ -1,0 +1,109 @@
+---
+title: Decisions
+description: Typed decisions about a message, ticket or record, with a calibrated probability for every option.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+<div class="ola-endpoint">
+	<code>POST /v1/decide</code><code>POST /v1/decide/batch</code><code>POST /v1/systemone</code><code>billed per decision</code>
+</div>
+
+Give the model a piece of **state** (a message, ticket, call transcript or form record) and **typed questions** about it. It returns a calibrated probability for every option, and works in English and eight African languages. Powered by [PurpleMIST-Flash-1.0](https://huggingface.co/olaverse/PurpleMIST-Flash-1.0).
+
+## Example
+
+<Tabs syncKey="lang">
+<TabItem label="Python">
+```python
+result = call("/v1/decide", {
+    "state": {"channel": "whatsapp",
+              "message": "Ẹ jọ̀ọ́, wọ́n ti yọ owó lẹ́ẹ̀mejì lórí káàdì mi. Mo fẹ́ kí ẹ dá owó mi padà."},
+    "questions": {
+        "team":    {"type": "choice", "instructions": "Which team should handle this?",
+                    "criteria": {"billing": "payments and refunds", "delivery": "orders in transit"}},
+        "refund":  {"type": "noul", "instructions": "The customer is asking for money back."},
+        "urgency": {"type": "score", "instructions": "How urgent is this?",
+                    "criteria": ["can wait", "normal queue", "today", "immediately"]},
+    },
+})
+
+answers = result["answers"]
+if answers["refund"]["noul"] > 0.9:
+    route_to(answers["team"]["choice"])
+```
+</TabItem>
+<TabItem label="curl">
+```bash
+curl -X POST "$OLAVERSE_URL/v1/decide" \
+  -H "Authorization: Bearer $OLAVERSE_KEY" -H "Content-Type: application/json" \
+  -d '{"state": "I was charged twice, please refund me",
+       "questions": {"refund": {"type": "noul", "instructions": "The customer asks for money back."}}}'
+```
+</TabItem>
+</Tabs>
+
+## Request
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `model` | string | Optional. `purplemist-flash-1.0` (default). |
+| `state` | string, object or array | The thing being decided about. It must not be empty. |
+| `questions` | object | 1 to 64 questions, keyed by your own IDs. |
+
+### Question types
+
+| `type` | `criteria` | You get back |
+| --- | --- | --- |
+| `choice` | 2 to 255 option keys, each mapped to a description (or `null`) | `choice` (best key), `probabilities`, `confidence` |
+| `noul` | Optional; only `true` / `false` keys | `noul`: the probability the statement is true |
+| `score` | A list of 2 to 26 level descriptions, lowest first | `score` (expected level), `probabilities`, `legend`, `confidence` |
+
+## Response
+
+Values are illustrative.
+
+```json
+{
+  "model": "purplemist-flash-1.0",
+  "answers": {
+    "team":    {"type": "choice", "choice": "billing",
+                "probabilities": {"billing": 0.98, "delivery": 0.02}, "confidence": 0.86},
+    "refund":  {"type": "noul", "noul": 0.97},
+    "urgency": {"type": "score", "score": 1.9,
+                "probabilities": {"0": 0.05, "1": 0.25, "2": 0.45, "3": 0.25},
+                "legend": {"0": "can wait", "1": "normal queue", "2": "today", "3": "immediately"},
+                "confidence": 0.12}
+  },
+  "usage": {"decisions": 3}
+}
+```
+
+## Reading the answers
+
+- **Probabilities are calibrated,** so thresholds mean what they say. For example, act automatically above 0.9 and send the rest to a person.
+- **`score` is the expected level.** 1.9 means "close to *today*". For the single most likely level, take the highest entry in `probabilities`.
+- **`confidence` measures how peaked the distribution is** (0 = no idea, 1 = certain). It is not a second probability.
+- **Ask several questions at once.** They share one pass over the state, so they cost no extra time.
+- **Long inputs are never truncated.** A state of up to about 32,000 tokens is read whole. Anything longer returns `413` with a "maximum context length" message, so split it into separate calls.
+
+## Batch
+
+`POST /v1/decide/batch` takes up to **32 cases** per call. Give each case an `id` to match the results back:
+
+```python
+result = call("/v1/decide/batch", {
+    "cases": [
+        {"id": "t-1001", "state": "Refund me now!", "questions": {"refund": {"type": "noul", "instructions": "Asks for a refund."}}},
+        {"id": "t-1002", "state": "Where is my parcel?", "questions": {"refund": {"type": "noul", "instructions": "Asks for a refund."}}},
+    ],
+})
+for r in result["results"]:
+    print(r["id"], r.get("answers") or r["error"])
+```
+
+Each case succeeds or fails on its own, so one bad case doesn't sink the batch. Failed cases come back as `{"id", "error", "status"}` (`400` invalid, `413` too long), and only answered questions are billed.
+
+<Aside title="System One and Ollama clients">
+`POST /v1/systemone` is the same endpoint at the System One path. Code written for that API, such as Ollama's decision endpoint, can switch its base URL to Olaverse and keep working.
+</Aside>

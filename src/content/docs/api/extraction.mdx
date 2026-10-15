@@ -1,0 +1,118 @@
+---
+title: Document extraction
+description: Turn a document (text, photo or screenshot) into JSON, with a calibrated confidence for every field.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+<div class="ola-endpoint">
+	<code>POST /v1/extract</code><code>POST /v1/extract/batch</code><code>billed per document</code>
+</div>
+
+Send a **template** (the shape of the answer, with a type for each field) and a **document** as text, an image, or both. You get the template filled in, plus a confidence between 0 and 1 for every field.
+
+It is built for African and English everyday documents: mobile-money and bank messages, receipts and bills in African currencies, letters, notices and forms. Powered by [MIST-Extract-1.0](https://huggingface.co/olaverse/MIST-Extract-1.0) and [MIST-Extract-Flash-1.0](https://huggingface.co/olaverse/MIST-Extract-Flash-1.0).
+
+## Example
+
+<Tabs syncKey="lang">
+<TabItem label="Python">
+```python
+r = call("/v1/extract", {
+    "template": {"recipient": "verbatim-string", "amount": "number", "fee": "number",
+                 "reference": "verbatim-string", "date": "date"},
+    "text": "Your MTN MoMo transfer of GHS 250.00 to KOFI MENSAH was successful. "
+            "Fee GHS 2.50. Ref 88213374. 14/10/2025",
+    "instructions": "Dates in this message are day/month/year."})
+print(r["data"], r["confidence"])
+```
+</TabItem>
+<TabItem label="curl">
+```bash
+curl -X POST "$OLAVERSE_URL/v1/extract" \
+  -H "Authorization: Bearer $OLAVERSE_KEY" -H "Content-Type: application/json" \
+  -d '{"template": {"recipient": "verbatim-string", "amount": "number", "date": "date"},
+       "text": "Your MTN MoMo transfer of GHS 250.00 to KOFI MENSAH was successful. 14/10/2025",
+       "instructions": "Dates in this message are day/month/year."}'
+```
+</TabItem>
+</Tabs>
+
+```json
+{"model": "mist-extract-1.0",
+ "data": {"recipient": "KOFI MENSAH", "amount": 250, "fee": 2.5, "reference": "88213374", "date": "2025-10-14"},
+ "confidence": {"recipient": 0.9785, "amount": 0.9932, "fee": 0.9971, "reference": 0.985, "date": 0.9897},
+ "usage": {"documents": 1}}
+```
+
+### From a photo or screenshot
+
+Send the image as base64 or a data URL. Image links are not fetched.
+
+```python
+import base64
+img = base64.b64encode(open("receipt.jpg", "rb").read()).decode()
+r = call("/v1/extract", {
+    "template": {"total": "number", "items": [{"name": "verbatim-string", "price": "number"}]},
+    "image": "data:image/jpeg;base64," + img})
+```
+
+## Request
+
+| Field | Default | Notes |
+| --- | --- | --- |
+| `template` | required | A JSON object (or a JSON string) with the shape of the answer, up to 8,000 characters. |
+| `text` | | The document as text, up to 60,000 characters. Give `text`, `image` or both. |
+| `image` | | One JPEG or PNG as base64 or a data URL, up to 10 MB. Large photos are scaled down automatically. |
+| `instructions` | | Optional guidance, such as "Dates are day/month/year" or "amounts in kobo". |
+| `model` | `mist-extract-1.0` | `mist-extract-1.0` (4B, most accurate) or `mist-extract-flash-1.0` (2B, faster). |
+
+### Template types
+
+Each leaf of the template names the type of that field:
+
+| Type | Meaning |
+| --- | --- |
+| `"verbatim-string"` | Copied exactly from the document |
+| `"string"` | Free text; may be tidied or paraphrased |
+| `"number"`, `"integer"` | Plain numbers, no currency symbols or separators |
+| `"date"` | ISO `YYYY-MM-DD` |
+| `"date-time"` | ISO date and time |
+| `"boolean"` | `true` or `false` |
+| `["cash", "card"]` | Pick one option |
+| `[["cash", "card"]]` | Pick any number of options |
+| `["string"]` | A list of values |
+| `[{...}]` | A list of objects, such as line items |
+
+A missing value comes back as `null`, and an empty list as `[]`.
+
+## Using the confidence
+
+Confidence is **calibrated**: when a field says 0.66, it is right about 66% of the time. A common pattern is to accept fields at 0.95 or above automatically and send the rest to a person to check. An empty list has no confidence.
+
+<Aside type="note">
+When the model's answer isn't valid JSON (rare), you get status `200` with `"data": null`, an error and the model's raw text, and the call is not billed.
+</Aside>
+
+## Batch
+
+`POST /v1/extract/batch` takes up to **16 documents**:
+
+```json
+{"model": "mist-extract-flash-1.0",
+ "documents": [{"id": "a", "template": {...}, "text": "..."},
+               {"id": "b", "template": {...}, "image": "data:image/png;base64,..."}]}
+```
+
+Each document succeeds or fails on its own. An invalid document comes back with `"error"` and `"status": 400` in its place, and only extracted documents are billed:
+
+```json
+{"model": "mist-extract-flash-1.0",
+ "results": [{"id": "a", "data": {...}, "confidence": {...}},
+             {"id": "b", "data": null, "confidence": null, "error": "give the document as 'text', 'image' ...", "status": 400}],
+ "usage": {"documents": 1}}
+```
+
+## Speed
+
+About 1 second per document when warm. After 5 idle minutes the model shuts down; warm it with `{"services": ["extract"]}` on [`/v1/warmup`](/get-started/warm-up/) when a user is about to upload something.

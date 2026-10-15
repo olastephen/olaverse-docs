@@ -1,0 +1,71 @@
+/* Olaverse Lab palette on Starlight: warm near-black / paper, brand purple accent.
+   Fonts match olaverselab.com. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+	--sl-font: 'IBM Plex Sans', system-ui, sans-serif;
+	--sl-font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+	--sl-color-accent-low: hsl(252, 45%, 20%);
+	--sl-color-accent: hsl(252, 100%, 68%);
+	--sl-color-accent-high: hsl(252, 100%, 86%);
+
+	--sl-color-white: hsl(40, 30%, 96%);
+	--sl-color-gray-1: hsl(40, 24%, 90%);
+	--sl-color-gray-2: hsl(36, 14%, 76%);
+	--sl-color-gray-3: hsl(36, 8%, 58%);
+	--sl-color-gray-4: hsl(30, 6%, 38%);
+	--sl-color-gray-5: hsl(28, 8%, 22%);
+	--sl-color-gray-6: hsl(24, 10%, 12%);
+	--sl-color-black: hsl(24, 11%, 7%);
+
+	--ola-pink: #e84b8a;
+	--ola-purple: #7c5cff;
+	--ola-cyan: #1fb9c9;
+}
+
+:root[data-theme='light'] {
+	--sl-color-accent-low: hsl(252, 100%, 92%);
+	--sl-color-accent: hsl(252, 80%, 56%);
+	--sl-color-accent-high: hsl(252, 70%, 34%);
+
+	--sl-color-white: hsl(24, 12%, 11%);
+	--sl-color-gray-1: hsl(24, 12%, 16%);
+	--sl-color-gray-2: hsl(26, 10%, 24%);
+	--sl-color-gray-3: hsl(28, 7%, 38%);
+	--sl-color-gray-4: hsl(30, 8%, 56%);
+	--sl-color-gray-5: hsl(30, 12%, 80%);
+	--sl-color-gray-6: hsl(40, 22%, 89%);
+	--sl-color-gray-7: hsl(40, 25%, 93%);
+	--sl-color-black: hsl(40, 30%, 96%);
+}
+
+h1, h2, h3, .site-title, .hero h1 {
+	font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+	letter-spacing: -0.02em;
+}
+
+.site-title {
+	font-weight: 700;
+	letter-spacing: 0.02em;
+	color: var(--sl-color-white);
+}
+
+/* Brand gradient hairline under the page header (the outer <header> only). */
+header.header {
+	background-image: linear-gradient(90deg, var(--ola-pink), var(--ola-purple), var(--ola-cyan));
+	background-size: 100% 2px;
+	background-repeat: no-repeat;
+	background-position: bottom;
+}
+
+/* Endpoint chips used in page intros. */
+.ola-endpoint {
+	display: inline-flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	margin: 0.5rem 0 1.25rem;
+}
+.ola-endpoint code {
+	font-size: var(--sl-text-xs);
+}
