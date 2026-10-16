@@ -23,6 +23,7 @@ export default defineConfig({
 						{ label: 'Quickstart', slug: 'get-started/quickstart' },
 						{ label: 'Authentication', slug: 'get-started/authentication' },
 						{ label: 'Cold starts and warm-up', slug: 'get-started/warm-up' },
+						{ label: 'OpenAI & OpenRouter clients', slug: 'get-started/compatibility' },
 					],
 				},
 				{
@@ -39,9 +40,8 @@ export default defineConfig({
 					label: 'Reference',
 					items: [
 						{ label: 'Models and utility endpoints', slug: 'reference/models' },
-						{ label: 'Billing and usage', slug: 'reference/billing' },
+						{ label: 'Pricing', slug: 'reference/billing' },
 						{ label: 'Errors', slug: 'reference/errors' },
-						{ label: 'Migrating from v2', slug: 'reference/v2' },
 					],
 				},
 			],

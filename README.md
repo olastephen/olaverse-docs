@@ -21,7 +21,8 @@ To add a page, create a `.md` or `.mdx` file under `src/content/docs/` and add i
 ## Conventions
 
 - Examples use `https://api.olaverselab.com` and a key from the developer console, never the Modal backend URL, so all traffic goes through the gateway that authenticates and bills it.
-- Figures and limits come from the API's v3 reference. Keep them in step with `Olaverse-console/src/lib/catalog.ts`, which drives the console's docs and playground.
+- Prices in `reference/billing.md` and the capability pages mirror `Olaverse-console/src/lib/pricing.ts`; change both together.
+- Figures and limits come from the API reference. Keep them in step with `Olaverse-console/src/lib/catalog.ts`, which drives the console's docs and playground.
 
 ## Deploying
 

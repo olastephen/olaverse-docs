@@ -65,13 +65,13 @@ Services start on demand and sleep after 5 idle minutes, so the first call after
 
 ## What's available
 
-| What you want | Endpoint | Billed per |
+| What you want | Endpoint | From, per 1M input tokens |
 | --- | --- | --- |
-| Typed decisions about a message or record | `POST /v1/decide` | decision |
-| A document as JSON, with a confidence per field | `POST /v1/extract` | document |
-| The language of a text (608 languages) | `POST /v1/language-id` | text |
-| Diacritics and tone marks restored (11 languages) | `POST /v1/diacritize` | 1,000 characters |
-| Search-style questions from a passage (25 languages) | `POST /v1/questions/generate` | passage |
+| Typed decisions about a message or record | `POST /v1/decide` | $0.15 |
+| A document as JSON, with a confidence per field | `POST /v1/extract` | $0.40 |
+| The language of a text (608 languages) | `POST /v1/language-id` | $0.005 |
+| Diacritics and tone marks restored (11 languages) | `POST /v1/diacritize` | $0.02 |
+| Search-style questions from a passage (25 languages) | `POST /v1/questions/generate` | $0.10 |
 | What's available | `GET /v1/models` | free |
 
-Each POST endpoint also has a `/batch` version. Every billable response includes a `usage` block in its billing unit.
+Each POST endpoint also has a `/batch` version. Prices are per token and depend on the model; see [Pricing](/reference/billing/).

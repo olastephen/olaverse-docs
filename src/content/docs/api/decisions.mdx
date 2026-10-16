@@ -6,10 +6,17 @@ description: Typed decisions about a message, ticket or record, with a calibrate
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
 <div class="ola-endpoint">
-	<code>POST /v1/decide</code><code>POST /v1/decide/batch</code><code>POST /v1/systemone</code><code>billed per decision</code>
+	<code>POST /v1/decide</code><code>POST /v1/decide/batch</code><code>POST /v1/systemone</code><code>from $0.15 / 1M tokens</code>
 </div>
 
-Give the model a piece of **state** (a message, ticket, call transcript or form record) and **typed questions** about it. It returns a calibrated probability for every option, and works in English and eight African languages. Powered by [PurpleMIST-Flash-1.0](https://huggingface.co/olaverse/PurpleMIST-Flash-1.0).
+Give the model a piece of **state** (a message, ticket, call transcript or form record) and **typed questions** about it. It returns a calibrated probability for every option, and works in English and eight African languages.
+
+| Model | Size | Use it when | Input / 1M tokens |
+| --- | --- | --- | --- |
+| [`purplemist-flash-1.0`](https://huggingface.co/olaverse/PurpleMIST-Flash-1.0) (default) | 7.9B | You want the highest accuracy, or your input is in an African language. | $0.60 |
+| [`purplemist-mini-1.0`](https://huggingface.co/olaverse/PurpleMIST-Mini-1.0) | 1.9B | Your input is English and you want the same interface at lower cost. | $0.15 |
+
+Decision models score every option rather than writing text, so there is no output charge.
 
 ## Example
 
@@ -47,7 +54,7 @@ curl -X POST "$OLAVERSE_URL/v1/decide" \
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `model` | string | Optional. `purplemist-flash-1.0` (default). |
+| `model` | string | Optional. `purplemist-flash-1.0` (default) or `purplemist-mini-1.0`. The `olaverse/PurpleMIST-Flash-1.0` form works too. |
 | `state` | string, object or array | The thing being decided about. It must not be empty. |
 | `questions` | object | 1 to 64 questions, keyed by your own IDs. |
 
@@ -75,7 +82,7 @@ Values are illustrative.
                 "legend": {"0": "can wait", "1": "normal queue", "2": "today", "3": "immediately"},
                 "confidence": 0.12}
   },
-  "usage": {"decisions": 3}
+  "usage": {"input_tokens": 312, "output_tokens": 0, "decisions": 3}
 }
 ```
 

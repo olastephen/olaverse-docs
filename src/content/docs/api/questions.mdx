@@ -6,7 +6,7 @@ description: Turn a passage into natural, search-style questions in its own lang
 import { Aside } from '@astrojs/starlight/components';
 
 <div class="ola-endpoint">
-	<code>POST /v1/questions/generate</code><code>POST /v1/questions/generate/batch</code><code>billed per passage</code>
+	<code>POST /v1/questions/generate</code><code>POST /v1/questions/generate/batch</code><code>from $0.10 / 1M tokens</code>
 </div>
 
 Turns a passage into `n` natural, search-style questions that it answers. Useful for FAQs, study cards and search training data. Powered by [mist-qg-1.5b](https://huggingface.co/olaverse/mist-qg-1.5b).
@@ -26,13 +26,14 @@ print(r["questions"])
 | --- | --- | --- |
 | `passage` | required | 1 to 8,000 characters. Works best at paragraph length. |
 | `n` | `3` | 1 to 10 questions. |
-| `language` | `English` | The passage's language: `yor`, `yo` or `Yoruba`, or any of the 25 in [`GET /v1/languages`](/reference/models/). Set it to match the passage. |
+| `language` | `English` | The passage's language, as a name or code: `yor`, `yo` or `Yoruba`. One of the [25 supported languages](#supported-languages). Set it to match the passage. |
 
 ## Response
 
 ```json
 {"questions": ["What causes ocean tides?", "...", "..."], "language": "eng",
- "model": "olaverse/mist-qg-1.5b", "warnings": [], "usage": {"generations": 1}}
+ "model": "olaverse/mist-qg-1.5b", "warnings": [],
+ "usage": {"input_tokens": 96, "output_tokens": 27, "generations": 1}}
 ```
 
 `warnings` flags a very short passage, or a language the model is less confident in.
@@ -40,6 +41,10 @@ print(r["questions"])
 <Aside type="tip">
 Don't know the passage's language? Call [`/v1/language-id`](/api/language-id/) on it first and pass the language it returns.
 </Aside>
+
+## Supported languages
+
+Afrikaans, Amharic, Dutch, English, French, German, Hausa, Hindi, Igbo, Indonesian, Italian, Japanese, Korean, Polish, Portuguese, Russian, Shona, Somali, Spanish, Swahili, Turkish, Vietnamese, Xhosa, Yorùbá and Zulu.
 
 ## Batch
 

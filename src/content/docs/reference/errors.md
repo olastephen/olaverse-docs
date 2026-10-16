@@ -3,14 +3,21 @@ title: Errors
 description: Status codes the API returns and what to do about each.
 ---
 
-Errors come back as `{"detail": "..."}` with these status codes:
+Errors come back in the shape OpenAI, OpenRouter and LiteLLM clients read, with the same message in `detail`:
+
+```json
+{"error": {"code": 400, "message": "unknown model 'jev-1.14'; see GET /v1/models"},
+ "detail": "unknown model 'jev-1.14'; see GET /v1/models"}
+```
+
+The status codes:
 
 | Status | Meaning | What to do |
 | --- | --- | --- |
 | `400` | The request is invalid: an empty field, an unknown model or language, or hints that don't match texts. | Fix the request; `detail` says what's wrong. |
 | `401` | The API key is missing or wrong. | Check the `Authorization` header. |
 | `413` | A decision request is too long for the model (it is never truncated), a document is too long for the GPU's memory, or the body is over its size limit. | Split the input. |
-| `422` | The body has the wrong types or out-of-range values. | `detail` lists the fields. |
+| `422` | The body has the wrong types or out-of-range values. | `message` names the first field; `detail` lists them all. |
 | `502` | The model service failed. | Safe to retry. |
 
 ## Cold starts

@@ -21,7 +21,7 @@ curl -X POST "$OLAVERSE_URL/v1/warmup" \
   -d '{"services": ["extract"]}'
 ```
 
-`/v1/warmup` returns straight away and starts the services in the background. It accepts any of:
+`/v1/warmup` returns straight away and starts the services in the background. `services` is required, and accepts any of:
 
 | Service | Warms |
 | --- | --- |

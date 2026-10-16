@@ -6,7 +6,7 @@ description: Turn a document (text, photo or screenshot) into JSON, with a calib
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
 <div class="ola-endpoint">
-	<code>POST /v1/extract</code><code>POST /v1/extract/batch</code><code>billed per document</code>
+	<code>POST /v1/extract</code><code>POST /v1/extract/batch</code><code>from $0.40 / 1M tokens</code>
 </div>
 
 Send a **template** (the shape of the answer, with a type for each field) and a **document** as text, an image, or both. You get the template filled in, plus a confidence between 0 and 1 for every field.
@@ -42,7 +42,7 @@ curl -X POST "$OLAVERSE_URL/v1/extract" \
 {"model": "mist-extract-1.0",
  "data": {"recipient": "KOFI MENSAH", "amount": 250, "fee": 2.5, "reference": "88213374", "date": "2025-10-14"},
  "confidence": {"recipient": 0.9785, "amount": 0.9932, "fee": 0.9971, "reference": 0.985, "date": 0.9897},
- "usage": {"documents": 1}}
+ "usage": {"input_tokens": 214, "output_tokens": 38, "documents": 1}}
 ```
 
 ### From a photo or screenshot
@@ -110,7 +110,7 @@ Each document succeeds or fails on its own. An invalid document comes back with 
 {"model": "mist-extract-flash-1.0",
  "results": [{"id": "a", "data": {...}, "confidence": {...}},
              {"id": "b", "data": null, "confidence": null, "error": "give the document as 'text', 'image' ...", "status": 400}],
- "usage": {"documents": 1}}
+ "usage": {"input_tokens": 230, "output_tokens": 41, "documents": 1}}
 ```
 
 ## Speed

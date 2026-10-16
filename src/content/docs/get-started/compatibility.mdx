@@ -1,0 +1,119 @@
+---
+title: Use with OpenAI and OpenRouter clients
+description: Point the OpenAI SDK, OpenRouter, TypeSafe, Ollama or LiteLLM clients at Olaverse by changing the base URL.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+Olaverse speaks the two formats most AI clients already use, so you can switch by changing the base URL and model name:
+
+| Format | Endpoint | Models | Works with |
+| --- | --- | --- | --- |
+| OpenAI chat completions | `POST /v1/chat/completions` | `mist-qg-1.5b`, `mist-extract-1.0`, `mist-extract-flash-1.0` | OpenAI SDKs, OpenRouter-style clients, anything that takes an OpenAI base URL |
+| System One decisions | `POST /v1/systemone` | `purplemist-flash-1.0`, `purplemist-mini-1.0` | TypeSafe SDK, OpenRouter's System One API, Ollama, LiteLLM |
+
+Model ids can be given as `olaverse/<name>` too, in any case: `olaverse/MIST-Extract-1.0` and `mist-extract-1.0` are the same model.
+
+## OpenAI chat completions
+
+Use your Olaverse key as the API key and `https://api.olaverselab.com/v1` as the base URL.
+
+### Question generation
+
+Send the passage as the user message. You always get back `{"questions": [...]}` as the message content, in the passage's own language.
+
+<Tabs syncKey="lang">
+<TabItem label="Python">
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key=os.environ["OLAVERSE_KEY"], base_url="https://api.olaverselab.com/v1")
+
+r = client.chat.completions.create(
+    model="mist-qg-1.5b",
+    messages=[{"role": "user", "content": "The Nile is the longest river in Africa. It flows north through "
+                                          "eleven countries before emptying into the Mediterranean Sea."}],
+    extra_body={"n": 3},   # optional: number of questions (1-10, default 3) and "language"
+)
+questions = json.loads(r.choices[0].message.content)["questions"]
+```
+</TabItem>
+<TabItem label="curl">
+```bash
+curl "$OLAVERSE_URL/v1/chat/completions" \
+  -H "Authorization: Bearer $OLAVERSE_KEY" -H "Content-Type: application/json" \
+  -d '{"model": "mist-qg-1.5b", "n": 2,
+       "messages": [{"role": "user", "content": "Water boils at 100 degrees Celsius at sea level."}]}'
+```
+</TabItem>
+</Tabs>
+
+- **`n`** (1 to 10, default 3) and **`language`** are optional extra fields. Without `language`, the passage's language is detected, and the response's top-level `language` field says which was used. If it can't be told with confidence, questions are in English and `warnings` says so.
+- The trained form `Write 3 questions that the passage directly answers, in English. ... Passage: <text>` works too; the count and the passage are read from it.
+- The model's output is constrained to the `{"questions": [...]}` schema, so it is always valid JSON with exactly `n` questions.
+- If you send **your own system message**, the request goes to the model as written, with no schema, for custom prompting.
+
+### Document extraction
+
+Send the **JSON template as the system message** (anything after the template is read as instructions), and the **document as the user message**: text, one image as a data URL, or both.
+
+```python
+r = client.chat.completions.create(
+    model="mist-extract-1.0",
+    messages=[
+        {"role": "system", "content": '{"recipient": "verbatim-string", "amount": "number", "date": "date"}\n'
+                                      "Dates are day/month/year."},
+        {"role": "user", "content": "Your MTN MoMo transfer of GHS 250.00 to KOFI MENSAH was successful. 14/10/2025"},
+    ],
+)
+data = json.loads(r.choices[0].message.content)
+confidence = r.model_extra["confidence"]   # per-field confidence, same shape as data
+```
+
+For a photo or screenshot, put the image in the user message:
+
+```python
+{"role": "user", "content": [
+    {"type": "text", "text": "Receipt attached."},
+    {"type": "image_url", "image_url": {"url": "data:image/jpeg;base64," + img_b64}},
+]}
+```
+
+You can also pass `template` and `instructions` as top-level fields (`extra_body={"template": {...}}` in the OpenAI SDK) instead of using the system message.
+
+The extracted JSON comes back as `message.content`. The per-field confidence comes back as an extra top-level `confidence` field, which the OpenAI SDK exposes on `model_extra`. See [Document extraction](/api/extraction/) for template types.
+
+### Streaming and usage
+
+Every model on `/v1/chat/completions` supports `"stream": true`. The last chunk before `data: [DONE]` carries `usage`, as OpenAI's `stream_options.include_usage` does. Non-streaming responses report usage as `prompt_tokens`, `completion_tokens` and `total_tokens`.
+
+## System One decisions
+
+`/v1/systemone` takes the same request as OpenRouter's, TypeSafe's and Ollama's System One endpoints (`model`, `state`, `questions`) and returns `model`, `answers` and `usage` with `input_tokens` and `output_tokens`.
+
+<Tabs syncKey="lang">
+<TabItem label="TypeSafe SDK">
+```python
+# Only the client settings and the model name change; your calls stay the same.
+client = TypeSafeClient(api_key=os.environ["OLAVERSE_KEY"],
+                        base_url="https://api.olaverselab.com")   # was https://openrouter.ai/api
+MODEL = "olaverse/purplemist-flash-1.0"                           # was typesafe/jev-1.14
+```
+</TabItem>
+<TabItem label="Plain HTTP">
+```bash
+curl "$OLAVERSE_URL/v1/systemone" \
+  -H "Authorization: Bearer $OLAVERSE_KEY" -H "Content-Type: application/json" \
+  -d '{"model": "olaverse/purplemist-flash-1.0", "state": "I was charged twice, please refund me",
+       "questions": {"refund": {"type": "noul", "instructions": "The customer asks for money back."}}}'
+```
+</TabItem>
+</Tabs>
+
+<Aside type="note">
+`box` questions (bounding boxes on images) are not supported. Decision models score options rather than writing text, so `output_tokens` is always 0.
+</Aside>
+
+## Errors
+
+Errors use the shape these clients expect, `{"error": {"code": 400, "message": "..."}}`. See [Errors](/reference/errors/).
