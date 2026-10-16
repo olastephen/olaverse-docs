@@ -5,6 +5,8 @@ description: Per-token prices for every model, and how tokens are counted.
 
 Pricing is pay as you go. You add credit to your account, and each call is deducted from it at the per-token price of the model you use. There are no subscriptions, minimums or monthly fees.
 
+**Every new account starts with $1 of free credit**, so you can try every endpoint before adding any.
+
 ## Pay as you go
 
 Prices are in US dollars, per million tokens.
