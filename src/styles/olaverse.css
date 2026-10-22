@@ -12,8 +12,8 @@
 
 	--sl-color-white: hsl(40, 30%, 96%);
 	--sl-color-gray-1: hsl(40, 24%, 90%);
-	--sl-color-gray-2: hsl(36, 14%, 76%);
-	--sl-color-gray-3: hsl(36, 8%, 58%);
+	--sl-color-gray-2: hsl(36, 16%, 84%);
+	--sl-color-gray-3: hsl(36, 10%, 70%);
 	--sl-color-gray-4: hsl(30, 6%, 38%);
 	--sl-color-gray-5: hsl(28, 8%, 22%);
 	--sl-color-gray-6: hsl(24, 10%, 12%);
@@ -31,13 +31,29 @@
 
 	--sl-color-white: hsl(24, 12%, 11%);
 	--sl-color-gray-1: hsl(24, 12%, 16%);
-	--sl-color-gray-2: hsl(26, 10%, 24%);
-	--sl-color-gray-3: hsl(28, 7%, 38%);
+	--sl-color-gray-2: hsl(26, 10%, 20%);
+	--sl-color-gray-3: hsl(28, 8%, 30%);
 	--sl-color-gray-4: hsl(30, 8%, 56%);
 	--sl-color-gray-5: hsl(30, 12%, 80%);
 	--sl-color-gray-6: hsl(40, 22%, 89%);
 	--sl-color-gray-7: hsl(40, 25%, 93%);
 	--sl-color-black: hsl(40, 30%, 96%);
+}
+
+/* Easier to read: a 17px base (every rem scales with it), and the small sizes Starlight uses for the sidebar,
+   the "On this page" list and code a step larger. */
+html {
+	font-size: 106.25%;
+}
+:root {
+	--sl-text-2xs: 0.8125rem;
+	--sl-text-xs: 0.875rem;
+	--sl-text-sm: 0.9375rem;
+	--sl-text-code: 0.9rem;
+	--sl-text-code-sm: 0.85rem;
+}
+.sidebar-content a {
+	font-size: var(--sl-text-base);
 }
 
 h1, h2, h3, .site-title, .hero h1 {
