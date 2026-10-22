@@ -19,9 +19,8 @@ All of them are open-weight and published on [Hugging Face](https://huggingface.
 
 | Endpoint | Key | What it does |
 | --- | --- | --- |
-| `GET /v1/models` | no | Lists every model with its endpoint, status (available / coming soon), billing unit and languages. |
+| `GET /v1/models` | no | Lists every model with its endpoint, status (available / coming soon), billing unit, price and languages. |
 | `GET /health` | no | `{"status": "ok", ...}` |
-| `POST /v1/warmup` | yes | Starts services in the background. See [Cold starts and warm-up](/get-started/warm-up/). |
 
 ```bash
 curl "$OLAVERSE_URL/v1/models"

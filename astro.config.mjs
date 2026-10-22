@@ -4,6 +4,8 @@ import starlight from '@astrojs/starlight';
 
 export default defineConfig({
 	site: 'https://docs.olaverselab.com',
+	// /v1/warmup was removed: models start on demand. Old links land on the quickstart.
+	redirects: { '/get-started/warm-up': '/get-started/quickstart' },
 	integrations: [
 		starlight({
 			title: 'Olaverse Lab Docs',
@@ -22,7 +24,6 @@ export default defineConfig({
 					items: [
 						{ label: 'Quickstart', slug: 'get-started/quickstart' },
 						{ label: 'Authentication', slug: 'get-started/authentication' },
-						{ label: 'Cold starts and warm-up', slug: 'get-started/warm-up' },
 						{ label: 'OpenAI & OpenRouter clients', slug: 'get-started/compatibility' },
 					],
 				},

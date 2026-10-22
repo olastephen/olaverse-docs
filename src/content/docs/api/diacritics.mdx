@@ -4,7 +4,7 @@ description: Restore diacritics, tone marks and Arabic vowel marks in 11 languag
 ---
 
 <div class="ola-endpoint">
-	<code>POST /v1/diacritize</code><code>POST /v1/diacritize/batch</code><code>from $0.02 / 1M tokens</code>
+	<code>POST /v1/diacritize</code><code>POST /v1/diacritize/batch</code><code>from $0.20 / 1M characters</code>
 </div>
 
 Puts back diacritics, tone marks and Arabic vowel marks in Yorùbá, Igbo, Hausa, Vietnamese, Polish, Turkish, Portuguese, Spanish, French, Italian and Arabic.
@@ -16,11 +16,11 @@ print(r["text"])   # ṣé ẹranko náà sì gbọ́ ọ?
 
 ## Which model?
 
-| `model` | Use it when | Runs on |
-| --- | --- | --- |
-| `diacnet-2.0` (default) | You want the best accuracy, or meaning hints for ambiguous words. | GPU |
-| `diacnet-mini-2.0` | You want nearly the same accuracy at half the size. | GPU |
-| `diactag-2.0` | You want the cheapest, fastest option. It never changes a letter, detects the language itself, and can leave unsure characters untouched. | CPU |
+| `model` | Use it when |
+| --- | --- |
+| `diacnet-2.0` (default) | You want the best accuracy, or meaning hints for ambiguous words. |
+| `diacnet-mini-2.0` | You want nearly the same accuracy at half the size. |
+| `diactag-2.0` | You want the cheapest, fastest option. It never changes a letter, detects the language itself, and can leave unsure characters untouched. |
 
 ## Request
 

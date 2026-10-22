@@ -16,13 +16,13 @@ The status codes:
 | --- | --- | --- |
 | `400` | The request is invalid: an empty field, an unknown model or language, or hints that don't match texts. | Fix the request; `detail` says what's wrong. |
 | `401` | The API key is missing or wrong. | Check the `Authorization` header. |
-| `413` | A decision request is too long for the model (it is never truncated), a document is too long for the GPU's memory, or the body is over its size limit. | Split the input. |
+| `413` | A decision request is too long for the model (it is never truncated), a document is too long for the model's memory, or the body is over its size limit. | Split the input. |
 | `422` | The body has the wrong types or out-of-range values. | `message` names the first field; `detail` lists them all. |
 | `502` | The model service failed. | Safe to retry. |
 
 ## Cold starts
 
-Each service shuts down after 5 idle minutes, and the next request waits while it starts. That's a slow response, not an error, so give your HTTP client a timeout of about 2 minutes and use [`/v1/warmup`](/get-started/warm-up/) ahead of time.
+Models start on demand and sleep when idle, so the first call after a quiet spell waits while the model starts: under a minute for language ID and diacritics, longer for decisions, extraction and question generation. That's a slow response, not an error, so give your HTTP client a timeout of about 2 minutes.
 
 ## Retrying
 

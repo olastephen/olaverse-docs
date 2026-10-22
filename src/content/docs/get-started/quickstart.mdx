@@ -13,7 +13,7 @@ https://api.olaverselab.com
 
 <Steps>
 
-1. **Create an API key.** Sign up at the [developer console](https://console.olaverselab.com) (new accounts start with $1 of free credit), open **API keys** and create one. It is shown once, so store it somewhere safe.
+1. **Create an API key.** Sign up at the [developer console](https://console.olaverselab.com) (new accounts start with $5 of free credit), open **API keys** and create one. It is shown once, so store it somewhere safe.
 
 2. **Set your environment.**
 
@@ -60,18 +60,18 @@ https://api.olaverselab.com
 The rest of these docs use the small `call` helper above in their Python examples.
 
 <Aside type="tip" title="First call slow?">
-Services start on demand and sleep after 5 idle minutes, so the first call after a quiet spell can take a while. Set your HTTP timeout to about 2 minutes, and [warm services up](/get-started/warm-up/) when you know traffic is coming.
+Models start on demand and sleep when idle, so the first call after a quiet spell waits while the model starts: under a minute for language ID and diacritics, longer for decisions, extraction and question generation. Set your HTTP timeout to about 2 minutes.
 </Aside>
 
 ## What's available
 
-| What you want | Endpoint | From, per 1M input tokens |
+| What you want | Endpoint | From |
 | --- | --- | --- |
-| Typed decisions about a message or record | `POST /v1/decide` | $0.15 |
-| A document as JSON, with a confidence per field | `POST /v1/extract` | $0.40 |
-| The language of a text (608 languages) | `POST /v1/language-id` | $0.005 |
-| Diacritics and tone marks restored (11 languages) | `POST /v1/diacritize` | $0.02 |
-| Search-style questions from a passage (25 languages) | `POST /v1/questions/generate` | $0.10 |
+| Typed decisions about a message or record | `POST /v1/decide` | $0.025 / 1M input tokens |
+| A document as JSON, with a confidence per field | `POST /v1/extract` | $0.04 / 1M input tokens |
+| The language of a text (608 languages) | `POST /v1/language-id` | $0.02 / 1,000 requests |
+| Diacritics and tone marks restored (11 languages) | `POST /v1/diacritize` | $0.20 / 1M characters |
+| Search-style questions from a passage (25 languages) | `POST /v1/questions/generate` | $0.04 / 1M input tokens |
 | What's available | `GET /v1/models` | free |
 
-Each POST endpoint also has a `/batch` version. Prices are per token and depend on the model; see [Pricing](/reference/billing/).
+Each POST endpoint also has a `/batch` version. Prices depend on the model; see [Pricing](/reference/billing/).
