@@ -3,7 +3,7 @@ title: Quickstart
 description: Create an API key and make your first call to the Olaverse API.
 ---
 
-import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
 
 Every capability lives behind one base URL:
 
@@ -58,10 +58,6 @@ https://api.olaverselab.com
 </Steps>
 
 The rest of these docs use the small `call` helper above in their Python examples.
-
-<Aside type="tip" title="First call slow?">
-Models start on demand and sleep when idle, so the first call after a quiet spell waits while the model starts: under a minute for language ID and diacritics, longer for decisions, extraction and question generation. Set your HTTP timeout to about 2 minutes.
-</Aside>
 
 ## What's available
 

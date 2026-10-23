@@ -20,10 +20,6 @@ The status codes:
 | `422` | The body has the wrong types or out-of-range values. | `message` names the first field; `detail` lists them all. |
 | `502` | The model service failed. | Safe to retry. |
 
-## Cold starts
-
-Models start on demand and sleep when idle, so the first call after a quiet spell waits while the model starts: under a minute for language ID and diacritics, longer for decisions, extraction and question generation. That's a slow response, not an error, so give your HTTP client a timeout of about 2 minutes.
-
 ## Retrying
 
 `502` is safe to retry. A simple pattern is up to three attempts with a growing pause:

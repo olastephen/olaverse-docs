@@ -115,4 +115,4 @@ Each document succeeds or fails on its own. An invalid document comes back with 
 
 ## Speed
 
-About 1 second per document once the model is running. It sleeps when idle, so the first document after a quiet spell waits while it starts; give your HTTP client a timeout of about 2 minutes.
+About 1 second per document. Long documents and large batches take longer, so give your HTTP client a timeout of about 2 minutes.

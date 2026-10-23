@@ -55,6 +55,13 @@ html {
 .sidebar-content a {
 	font-size: var(--sl-text-base);
 }
+/* Badges keep one small, even size next to the larger sidebar text. */
+.sidebar-content .sl-badge {
+	font-size: 0.75rem;
+	line-height: 1.35;
+	padding: 0.05rem 0.4rem;
+	vertical-align: 0.1em;
+}
 
 h1, h2, h3, .site-title, .hero h1 {
 	font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
