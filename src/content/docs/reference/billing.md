@@ -13,27 +13,27 @@ Prices are in US dollars. Each model is charged in the unit that fits what it do
 
 | Model | Endpoint | Price |
 | --- | --- | --- |
-| `purplemist-flash-1.0` | `/v1/decide` | $0.12 per 1M input tokens, output free |
-| `purplemist-mini-1.0` | `/v1/decide` | $0.025 per 1M input tokens, output free |
-| `mist-extract-1.0` | `/v1/extract` | $1.00 per 1,000 documents |
-| `mist-extract-flash-1.0` | `/v1/extract` | $0.04 per 1M input tokens, output free |
+| `purplemist-flash-1.0` | `/v1/decide` | $0.06 per 1M input tokens, output free |
+| `purplemist-mini-1.0` | `/v1/decide` | $0.02 per 1M input tokens, output free |
+| `mist-extract-1.0` | `/v1/extract` | $2.50 per 1,000 documents of up to 5 pages; extra pages $0.50 per 1,000 |
+| `mist-extract-flash-1.0` | `/v1/extract` | $0.20 per 1M input tokens, output free |
 | `mist-qg-1.5b` | `/v1/questions/generate` | $0.04 per 1M input tokens, $0.12 per 1M output tokens |
-| `lid-neural-608` | `/v1/language-id` | $0.10 per 1,000 requests |
-| `lid-lite-608` | `/v1/language-id` | $0.02 per 1,000 requests |
+| `lid-neural-608` | `/v1/language-id` | $0.30 per 1,000 requests |
+| `lid-lite-608` | `/v1/language-id` | $0.05 per 1,000 requests |
 | `diacnet-2.0` | `/v1/diacritize` | $1.00 per 1M characters |
 | `diacnet-mini-2.0` | `/v1/diacritize` | $0.60 per 1M characters |
 | `diactag-2.0` | `/v1/diacritize` | $0.20 per 1M characters |
 
-For scale: a typical decision of about 1,900 tokens on `purplemist-flash-1.0` costs about $0.23 per 1,000 decisions.
+For scale: a typical decision of about 1,900 tokens on `purplemist-flash-1.0` costs about $0.11 per 1,000 decisions.
 
 `GET /v1/models` and `/health` are free. Models that are also listed on OpenRouter cost the same here.
 
 ## How each call is charged
 
 - **Tokens.** Input tokens are everything you send the model: the state and questions, the template and document (images included), or the passage. Output tokens are what it writes. Decisions and MIST-Extract-Flash charge input only. Asking more decision questions about the same state adds only the questions' own tokens, because they share one pass over the state.
-- **Requests.** Each language-ID request covers one text of up to 1,000 characters. In a batch, each text counts as one request.
+- **Requests.** Each language-ID request is one text of up to 1,000 characters. In a batch, each text counts as one request.
 - **Characters.** Diacritics are charged on the characters of text you send.
-- **Documents.** MIST-Extract-1.0 is charged per document extracted, whatever its length.
+- **Documents.** MIST-Extract-1.0 is charged per document extracted, flat up to 5 pages. An image is one page, and so is each 3,000 characters of text; pages beyond 5 cost $0.50 per 1,000. `usage.pages` shows the count.
 - **Minimum per request.** Each request costs at least one unit, or 500 tokens on token-priced models.
 
 Every response carries a `usage` block with the tokens, texts, characters or documents it was charged on.

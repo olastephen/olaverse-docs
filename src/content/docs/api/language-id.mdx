@@ -4,7 +4,7 @@ description: Identify the language of a text from 608 languages, built African-f
 ---
 
 <div class="ola-endpoint">
-	<code>POST /v1/language-id</code><code>POST /v1/language-id/batch</code><code>from $0.02 / 1,000 requests</code>
+	<code>POST /v1/language-id</code><code>POST /v1/language-id/batch</code><code>from $0.05 / 1,000 requests</code>
 </div>
 
 Identifies 608 languages and holds up on short, messy user input. Powered by [lid-neural-608](https://huggingface.co/olaverse/lid-neural-608) and [lid-lite-608](https://huggingface.co/olaverse/lid-lite-608).
@@ -18,7 +18,7 @@ print(r["language"], r["confidence"])   # yor 0.97
 
 | Field | Default | Notes |
 | --- | --- | --- |
-| `text` | required | Up to 8,000 characters. |
+| `text` | required | Up to 1,000 characters. Each text is one request. |
 | `model` | `lid-neural-608` | `lid-neural-608` is the most accurate; `lid-lite-608` (fastText) is the fastest. |
 | `mode` | `traffic` | `traffic` is for user input, chat and routing: on short text it leans towards the languages people actually use. `coverage` treats every language equally, for building corpora. |
 | `top_k` | `3` | 1 to 25 runner-up languages in `top`. |

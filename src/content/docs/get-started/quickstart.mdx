@@ -67,9 +67,9 @@ Models start on demand and sleep when idle, so the first call after a quiet spel
 
 | What you want | Endpoint | From |
 | --- | --- | --- |
-| Typed decisions about a message or record | `POST /v1/decide` | $0.025 / 1M input tokens |
-| A document as JSON, with a confidence per field | `POST /v1/extract` | $0.04 / 1M input tokens |
-| The language of a text (608 languages) | `POST /v1/language-id` | $0.02 / 1,000 requests |
+| Typed decisions about a message or record | `POST /v1/decide` | $0.02 / 1M input tokens |
+| A document as JSON, with a confidence per field | `POST /v1/extract` | $0.20 / 1M input tokens |
+| The language of a text (608 languages) | `POST /v1/language-id` | $0.05 / 1,000 requests |
 | Diacritics and tone marks restored (11 languages) | `POST /v1/diacritize` | $0.20 / 1M characters |
 | Search-style questions from a passage (25 languages) | `POST /v1/questions/generate` | $0.04 / 1M input tokens |
 | What's available | `GET /v1/models` | free |
