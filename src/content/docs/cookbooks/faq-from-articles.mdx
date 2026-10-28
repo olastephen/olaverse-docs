@@ -7,45 +7,84 @@ import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
 
 **Generate the questions customers would actually type, from the articles you already have, in the language each article is written in.**
 
-An FAQ written by hand drifts from the articles and rarely exists for your Swahili or Yorùbá pages. Question generation reads a passage and writes `n` questions it answers. Detect each article's language first, so the questions come back in it.
+An FAQ written by hand drifts from the articles and rarely exists for your Swahili or Yorùbá pages. Question generation reads a passage and writes questions it answers. The script detects each article's language first, so the questions come back in it, then works paragraph by paragraph.
 
-## Request
+## Run it
 
-Split long articles into paragraph-sized passages (up to 8,000 characters; a paragraph works best), then:
-
-```python
-def questions_for(passage, n=3):
-    lang = call("/v1/language-id", {"text": passage[:1000]})["language"]
-    return call("/v1/questions/generate", {"passage": passage, "n": n, "language": lang})
+```bash
+pip install requests
+export OLAVERSE_KEY="your-key"     # from https://console.olaverselab.com
+python faq.py
 ```
+
+## The script
+
+```python title="faq.py"
+import json
+import os
+
+import requests
+
+URL = os.environ.get("OLAVERSE_URL", "https://api.olaverselab.com")
+HEADERS = {"Authorization": f"Bearer {os.environ['OLAVERSE_KEY']}"}
+
+
+def call(path, body):
+    r = requests.post(f"{URL}{path}", json=body, headers=HEADERS, timeout=120)
+    r.raise_for_status()
+    return r.json()
+
+
+def paragraphs(text):
+    # Question generation works best on paragraph-sized passages (up to 8,000 characters).
+    return [p.strip() for p in text.split("\n\n") if len(p.strip()) > 80]
+
+
+def build_faq(articles, per_passage=3):
+    faq = []
+    for article in articles:
+        # Detect the language once per article (language ID reads up to 1,000 characters).
+        language = call("/v1/language-id", {"text": article["body"][:1000]})["language"]
+        for passage in paragraphs(article["body"]):
+            r = call("/v1/questions/generate", {"passage": passage, "n": per_passage, "language": language})
+            if r["warnings"]:          # very short passage, or a language the model is less sure of
+                continue
+            faq += [{"question": q, "language": r["language"], "answer_url": article["url"]} for q in r["questions"]]
+    return faq
+
+
+if __name__ == "__main__":
+    articles = [
+        {"url": "https://help.example.com/reset-pin",
+         "body": ("To reset your wallet PIN, open the app and choose Settings, then Security, then Reset PIN. "
+                  "You will receive a one-time code by SMS; enter it within five minutes.\n\n"
+                  "If you no longer have the phone number on your account, visit any agent with a valid ID. "
+                  "The agent can reset your PIN after confirming your identity.")},
+    ]
+    print(json.dumps(build_faq(articles), indent=2, ensure_ascii=False))
+```
+
+Replace `articles` with your own: anything with a URL and a body of text, separated into paragraphs by blank lines.
 
 ## Response
 
-Values are illustrative.
+What `/v1/questions/generate` returns for the first paragraph. Values are illustrative.
 
 ```json
 {
-  "questions": ["How do I reset my M-Pesa PIN?", "What do I need to change my PIN?", "Can I reset my PIN without visiting an agent?"],
+  "questions": ["How do I reset my wallet PIN?", "Where do I find Reset PIN in the app?", "How long is the SMS code valid?"],
   "language": "eng", "model": "olaverse/mist-qg-1.5b", "warnings": [],
   "usage": {"input_tokens": 142, "output_tokens": 31, "generations": 1}
 }
 ```
 
-## Act on the answer
+The script prints a JSON list of `{"question", "language", "answer_url"}` entries, ready for your help centre or search index.
 
-```python
-faq = []
-for article in articles:
-    for passage in split_into_paragraphs(article.body):
-        r = questions_for(passage)
-        if r["warnings"]:
-            continue                      # very short passage, or a language the model is less sure of
-        faq += [{"question": q, "answer_url": article.url} for q in r["questions"]]
-```
+## How the answer is used
 
 - **Questions stay in the passage's language.** `language` tells the model what the passage is written in; it never translates.
-- **`warnings`** flags a passage too short to work from, or a language the model is less confident in. Skip or review those.
-- **Link each question to its article** rather than writing new answers, so the FAQ never contradicts the source.
+- **`warnings`** flags a passage too short to work from, or a language the model is less confident in. The script skips those.
+- **Each question links to its article** rather than to a new answer, so the FAQ never contradicts the source.
 
 <Aside type="tip">
 The same questions make search training data: each (question, passage) pair is a query your retriever should match to that passage.
@@ -53,8 +92,8 @@ The same questions make search training data: each (question, passage) pair is a
 
 ## Adapt it
 
-- **Fewer calls:** `POST /v1/questions/generate/batch` takes up to 64 passages in one language per call. Group passages by detected language first.
-- **More or fewer questions:** `n` from 1 to 10.
+- **Fewer calls:** `POST /v1/questions/generate/batch` takes up to 64 passages in one language per call (`{"passages": [...], "n": 3, "language": "yor"}`).
+- **More or fewer questions:** `per_passage`, from 1 to 10.
 - **OpenAI SDK:** the same model answers on `/v1/chat/completions`; see [OpenAI & OpenRouter clients](/get-started/compatibility/).
 
 <CardGrid>

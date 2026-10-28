@@ -7,52 +7,90 @@ import { LinkCard, CardGrid } from '@astrojs/starlight/components';
 
 **Know what language a message is in before you act on it, and route it to someone, or something, that can read it.**
 
-General-purpose detectors mislabel short African-language messages: a Yorùbá greeting comes back as English, Hausa as "unknown". Language identification covers 608 languages, and its `traffic` mode is tuned for short, messy user input.
+General-purpose detectors mislabel short African-language messages: a Yorùbá greeting comes back as English, Hausa as "unknown". Language identification covers 608 languages, and its default `traffic` mode is tuned for short, messy user input. This script checks a batch of messages in one call and assigns each a queue.
 
-## Request
+## Run it
 
-```python
-r = call("/v1/language-id", {"text": "Ina son in canza lambar wayata", "top_k": 3})
+```bash
+pip install requests
+export OLAVERSE_KEY="your-key"     # from https://console.olaverselab.com
+python route.py
+```
+
+## The script
+
+```python title="route.py"
+import os
+
+import requests
+
+URL = os.environ.get("OLAVERSE_URL", "https://api.olaverselab.com")
+HEADERS = {"Authorization": f"Bearer {os.environ['OLAVERSE_KEY']}"}
+
+
+def call(path, body):
+    r = requests.post(f"{URL}{path}", json=body, headers=HEADERS, timeout=120)
+    r.raise_for_status()
+    return r.json()
+
+
+# ISO 639-3 codes, as the API returns them, to your queues.
+QUEUES = {"yor": "yoruba-agents", "hau": "hausa-agents", "ibo": "igbo-agents", "eng": "english-agents"}
+SURE = 0.6   # below this the text is usually too short to tell ("ok", "hi")
+
+
+def route(messages):
+    # One batch call for up to 256 messages; results come back in the same order.
+    results = call("/v1/language-id/batch", {"texts": messages})["results"]
+    routed = []
+    for message, r in zip(messages, results):
+        if r["language"] == "zxx" or r["confidence"] < SURE:
+            queue = "general"                      # code, numbers, or too short
+        else:
+            queue = QUEUES.get(r["language"], "general")
+        routed.append((queue, r["language"], round(r["confidence"], 2), message))
+    return routed
+
+
+if __name__ == "__main__":
+    messages = [
+        "Ina son in canza lambar wayata",
+        "Mo fẹ́ mọ ìgbà tí ẹrù mi máa dé",
+        "Biko, enyemaka m chọrọ maka akaụntụ m",
+        "Please cancel my order",
+        "12345",
+    ]
+    for queue, language, confidence, message in route(messages):
+        print(f"{queue:15} {language:4} {confidence:5}  {message}")
 ```
 
 ## Response
 
-Values are illustrative.
+What `/v1/language-id/batch` returns for each message, in order. Values are illustrative.
 
 ```json
-{
-  "language": "hau", "script": "Latn", "label": "hau_Latn", "language_name": "Hausa",
-  "confidence": 0.98,
-  "top": [{"label": "hau_Latn", "language": "hau", "score": 0.98},
-          {"label": "ful_Latn", "language": "ful", "score": 0.01},
-          {"label": "eng_Latn", "language": "eng", "score": 0.0}],
-  "warnings": [], "model": "lid-neural-608", "mode": "traffic", "usage": {"texts": 1}
-}
+{"results": [
+  {"language": "hau", "script": "Latn", "label": "hau_Latn", "language_name": "Hausa", "confidence": 0.98,
+   "top": [{"label": "hau_Latn", "language": "hau", "score": 0.98}], "warnings": [],
+   "model": "lid-neural-608", "mode": "traffic", "usage": {"texts": 1}},
+  ...
+]}
 ```
 
-## Act on the answer
+The script prints one line per message, for example `hausa-agents    hau   0.98  Ina son in canza lambar wayata`.
 
-```python
-QUEUES = {"yor": "yoruba-agents", "hau": "hausa-agents", "ibo": "igbo-agents", "eng": "english-agents"}
-
-def route(message):
-    r = call("/v1/language-id", {"text": message})
-    if r["language"] == "zxx" or r["confidence"] < 0.6:
-        return "general"                       # code, numbers, or too short to tell
-    return QUEUES.get(r["language"], "general")
-```
+## How the answer is used
 
 - **`language` is ISO 639-3** (`yor`, `hau`, `ibo`, `swh`); `label` adds the script (`yor_Latn`).
-- **`zxx_Zxxx` means no language**: the text is code, numbers or symbols.
-- **Low confidence on very short text** ("ok", "hi") is expected. Route those by the conversation's earlier messages, or to a general queue.
+- **`zxx` means no language**: the text is code, numbers or symbols, like `12345`.
+- **Low confidence on very short text** ("ok", "hi") is expected; below `SURE` the script sends it to `general`. Route those by the conversation's earlier messages if you have them.
 
 ## Adapt it
 
-- **Then decide:** pass the detected language into a [decision](/cookbooks/support-ticket-triage/) as part of the state, or use it to pick the language your reply is written in.
+- **Then decide:** add the detected language to the state of a [decision](/cookbooks/support-ticket-triage/), or use it to pick the language of your reply.
 - **Restore tone marks for display:** messages typed without diacritics read better after `POST /v1/diacritize` with the detected `language` (Yorùbá, Igbo, Hausa and 8 others).
-- **Questions in the right language:** [question generation](/api/questions/) needs the passage's language; detect it first.
-- **Fastest and cheapest:** `"model": "lid-lite-608"`. For corpora where every language should count equally, `"mode": "coverage"`.
-- **Many messages:** `POST /v1/language-id/batch` takes 256 texts per call.
+- **Fastest and cheapest:** add `"model": "lid-lite-608"`. For corpora where every language should count equally, `"mode": "coverage"`.
+- **Long messages:** each text can be up to 1,000 characters; the first 1,000 are plenty to tell the language.
 
 <CardGrid>
 	<LinkCard title="Language identification" description="Models, modes and fields." href="/api/language-id/" />
