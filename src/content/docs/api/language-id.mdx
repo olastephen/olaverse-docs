@@ -3,8 +3,10 @@ title: Language identification
 description: Identify the language of a text from 608 languages, built African-first.
 ---
 
+import Price from '../../../components/Price.astro';
+
 <div class="ola-endpoint">
-	<code>POST /v1/language-id</code><code>POST /v1/language-id/batch</code><code>from $0.05 / 1,000 requests</code>
+	<code>POST /v1/language-id</code><code>POST /v1/language-id/batch</code><code><Price model="language-id" format="from" /></code>
 </div>
 
 Identifies 608 languages and holds up on short, messy user input. Powered by [lid-neural-608](https://huggingface.co/olaverse/lid-neural-608) and [lid-lite-608](https://huggingface.co/olaverse/lid-lite-608).

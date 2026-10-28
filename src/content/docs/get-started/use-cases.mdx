@@ -1,0 +1,73 @@
+---
+title: Example use cases
+description: What teams build on the Olaverse models, from support routing to payment messages and multilingual search.
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+Each use case below has a full walkthrough on [olaverselab.com](https://www.olaverselab.com/use-cases), with the pipeline step by step, benchmark figures from the model cards, and code.
+
+## Decisions and extraction
+
+<CardGrid>
+	<LinkCard
+		title="Automated decisions"
+		description="Route, flag and score tickets, chats and records with calibrated probabilities, in English and eight African languages."
+		href="https://www.olaverselab.com/use-cases/automated-decisions"
+	/>
+	<LinkCard
+		title="Document extraction"
+		description="Fill a JSON template from a photo, a scan or plain text, with a calibrated confidence on every field."
+		href="https://www.olaverselab.com/use-cases/document-extraction"
+	/>
+	<LinkCard
+		title="Payment messages"
+		description="Pull the amount, sender, reference and date out of mobile-money and bank SMS, then decide whether it is genuine."
+		href="https://www.olaverselab.com/use-cases/payment-messages"
+	/>
+</CardGrid>
+
+## Language and search
+
+<CardGrid>
+	<LinkCard
+		title="Language routing"
+		description="Detect the language of tickets, chats, queries and documents across 608 languages, before you act on them."
+		href="https://www.olaverselab.com/use-cases/language-routing"
+	/>
+	<LinkCard
+		title="Diacritic restoration"
+		description="Restore tone marks on text typed or scraped without them, from Yorùbá and Igbo to Vietnamese and Polish."
+		href="https://www.olaverselab.com/use-cases/diacritic-restoration"
+	/>
+	<LinkCard
+		title="Arabic diacritization"
+		description="Restore Arabic tashkīl, with or without case endings, for text-to-speech, teaching and readable copy."
+		href="https://www.olaverselab.com/use-cases/arabic-diacritization"
+	/>
+	<LinkCard
+		title="Search that matches"
+		description="Restore lost marks, then match on an accent-folded key, so typing “oko” finds “ọkọ”."
+		href="https://www.olaverselab.com/use-cases/search-that-matches"
+	/>
+</CardGrid>
+
+## Questions and training data
+
+<CardGrid>
+	<LinkCard
+		title="Question generation"
+		description="Natural, search-style questions from any passage in 25 languages, for quizzes, FAQs and assessment banks."
+		href="https://www.olaverselab.com/use-cases/question-generation"
+	/>
+	<LinkCard
+		title="Retrieval training data"
+		description="Generate verified (query, passage) pairs from your own corpus to fine-tune retrievers and rerankers."
+		href="https://www.olaverselab.com/use-cases/retrieval-training-data"
+	/>
+	<LinkCard
+		title="Low-resource corpus mining"
+		description="Sort web crawls into 608 languages on CPUs and pull out the African and low-resource text."
+		href="https://www.olaverselab.com/use-cases/web-corpus-mining"
+	/>
+</CardGrid>

@@ -3,8 +3,10 @@ title: Diacritic restoration
 description: Restore diacritics, tone marks and Arabic vowel marks in 11 languages.
 ---
 
+import Price from '../../../components/Price.astro';
+
 <div class="ola-endpoint">
-	<code>POST /v1/diacritize</code><code>POST /v1/diacritize/batch</code><code>from $0.20 / 1M characters</code>
+	<code>POST /v1/diacritize</code><code>POST /v1/diacritize/batch</code><code><Price model="diacritize" format="from" /></code>
 </div>
 
 Puts back diacritics, tone marks and Arabic vowel marks in Yorùbá, Igbo, Hausa, Vietnamese, Polish, Turkish, Portuguese, Spanish, French, Italian and Arabic.

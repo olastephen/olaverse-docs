@@ -3,10 +3,11 @@ title: Question generation
 description: Turn a passage into natural, search-style questions in its own language, across 25 languages.
 ---
 
+import Price from '../../../components/Price.astro';
 import { Aside } from '@astrojs/starlight/components';
 
 <div class="ola-endpoint">
-	<code>POST /v1/questions/generate</code><code>POST /v1/questions/generate/batch</code><code>from $0.04 / 1M tokens</code>
+	<code>POST /v1/questions/generate</code><code>POST /v1/questions/generate/batch</code><code><Price model="questions" format="from" /></code>
 </div>
 
 Turns a passage into `n` natural, search-style questions that it answers. Useful for FAQs, study cards and search training data. Powered by [mist-qg-1.5b](https://huggingface.co/olaverse/mist-qg-1.5b).

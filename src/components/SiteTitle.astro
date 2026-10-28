@@ -1,0 +1,75 @@
+---
+// The Olaverse Lab lockup, as on olaverselab.com and the console: mark, OLAVERSE, a hairline,
+// LAB in the brand gradient, and a DOCS suffix. Hover runs the gradient across and turns the mark.
+import logo from '../assets/logo.png';
+
+const { siteTitleHref } = Astro.locals.starlightRoute;
+---
+
+<a href={siteTitleHref} class="ola-wordmark" aria-label="Olaverse Lab Docs" translate="no">
+	<img src={logo.src} width="28" height="28" alt="" class="ola-wordmark__mark" />
+	<span class="ola-wordmark__word">OLAVERSE</span>
+	<span aria-hidden="true" class="ola-wordmark__rule"></span>
+	<span class="ola-wordmark__word ola-wordmark__lab">LAB</span>
+	<span class="ola-wordmark__suffix">Docs</span>
+</a>
+
+<style>
+	.ola-wordmark {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.625rem;
+		text-decoration: none;
+		white-space: nowrap;
+		user-select: none;
+		min-width: 0;
+	}
+	.ola-wordmark__mark {
+		width: 1.75rem;
+		height: 1.75rem;
+		flex-shrink: 0;
+		transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+	}
+	.ola-wordmark__word {
+		font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+		font-weight: 700;
+		font-size: 1rem;
+		line-height: 1;
+		letter-spacing: 0.04em;
+		color: var(--sl-color-white);
+	}
+	.ola-wordmark__rule {
+		width: 1px;
+		height: 0.875rem;
+		background: var(--sl-color-hairline-shade, var(--sl-color-gray-5));
+	}
+	.ola-wordmark__lab {
+		background: linear-gradient(90deg, var(--ola-pink), var(--ola-purple), var(--ola-cyan), var(--ola-pink));
+		background-size: 300% 100%;
+		background-position: 0% 50%;
+		-webkit-background-clip: text;
+		background-clip: text;
+		color: transparent;
+		transition: background-position 0.9s ease;
+	}
+	.ola-wordmark__suffix {
+		margin-inline-start: 0.25rem;
+		font-family: var(--sl-font-mono);
+		font-size: 0.75rem;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+		color: var(--sl-color-gray-3);
+	}
+	.ola-wordmark:hover .ola-wordmark__lab {
+		background-position: 100% 50%;
+	}
+	.ola-wordmark:hover .ola-wordmark__mark {
+		transform: rotate(120deg);
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.ola-wordmark__lab,
+		.ola-wordmark__mark {
+			transition: none;
+		}
+	}
+</style>

@@ -1,0 +1,35 @@
+---
+// A model price that stays in step with the admin page: rendered from GET /v1/models at build time, then
+// refreshed from the same endpoint in the browser.
+//   <Price model="purplemist-flash-1.0" />                      $0.06 per 1M input tokens, output free
+//   <Price model="purplemist-flash-1.0" format="input" />       $0.06
+//   <Price model="decide" format="from" />                      from $0.02 / 1M tokens
+//   <Price model="purplemist-flash-1.0" format="per-1000" tokens={1900} />   $0.11
+import { formatPrice, getBuildPrices, type PriceFormat } from '../lib/pricing';
+
+interface Props {
+	model: string;
+	format?: PriceFormat;
+	tokens?: number;
+}
+
+const { model, format = 'line', tokens } = Astro.props;
+const text = formatPrice(await getBuildPrices(), model, format, tokens);
+---
+
+<span data-ola-price={model} data-format={format} data-tokens={tokens}>{text}</span>
+
+<script>
+	import { fetchPrices, formatPrice, type PriceFormat } from '../lib/pricing';
+
+	const els = document.querySelectorAll<HTMLElement>('[data-ola-price]');
+	if (els.length) {
+		fetchPrices().then((table) => {
+			for (const el of els) {
+				const tokens = el.dataset.tokens ? Number(el.dataset.tokens) : undefined;
+				const text = formatPrice(table, el.dataset.olaPrice!, el.dataset.format as PriceFormat, tokens);
+				if (text && text !== el.textContent) el.textContent = text;
+			}
+		});
+	}
+</script>

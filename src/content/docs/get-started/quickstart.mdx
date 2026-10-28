@@ -1,9 +1,10 @@
 ---
 title: Quickstart
-description: Create an API key and make your first call to the Olaverse API.
+description: Create an API key and make your first decision call to the Olaverse API.
 ---
 
-import { Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+import Price from '../../../components/Price.astro';
+import { Steps, Tabs, TabItem, Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
 
 Every capability lives behind one base URL:
 
@@ -11,63 +12,133 @@ Every capability lives behind one base URL:
 https://api.olaverselab.com
 ```
 
+## Set up your API key
+
 <Steps>
 
-1. **Create an API key.** Sign up at the [developer console](https://console.olaverselab.com) (new accounts start with $5 of free credit), open **API keys** and create one. It is shown once, so store it somewhere safe.
+1. Sign up at the [developer console](https://console.olaverselab.com). New accounts start with $5 of free credit.
 
-2. **Set your environment.**
+2. Open **API keys** and create one. It is shown once, so store it somewhere safe.
 
+3. Set it in your environment:
+
+   <Tabs syncKey="os">
+   <TabItem label="macOS / Linux">
    ```bash
    export OLAVERSE_URL="https://api.olaverselab.com"
    export OLAVERSE_KEY="your-key"
    ```
-
-3. **Make a call.** This asks whether a customer wants a refund:
-
-   <Tabs syncKey="lang">
-   <TabItem label="curl">
-   ```bash
-   curl -X POST "$OLAVERSE_URL/v1/decide" \
-     -H "Authorization: Bearer $OLAVERSE_KEY" \
-     -H "Content-Type: application/json" \
-     -d '{"state": "I was charged twice, please refund me",
-          "questions": {"refund": {"type": "noul", "instructions": "The customer asks for money back."}}}'
-   ```
    </TabItem>
-   <TabItem label="Python">
-   ```python
-   import os, requests
-
-   URL = os.environ["OLAVERSE_URL"]
-   HEADERS = {"Authorization": f"Bearer {os.environ['OLAVERSE_KEY']}"}
-
-   def call(path, body):
-       r = requests.post(f"{URL}{path}", json=body, headers=HEADERS, timeout=120)
-       r.raise_for_status()
-       return r.json()
-
-   result = call("/v1/decide", {
-       "state": "I was charged twice, please refund me",
-       "questions": {"refund": {"type": "noul", "instructions": "The customer asks for money back."}},
-   })
-   print(result["answers"]["refund"]["noul"])   # e.g. 0.97
+   <TabItem label="Windows">
+   ```powershell
+   $env:OLAVERSE_URL = "https://api.olaverselab.com"
+   $env:OLAVERSE_KEY = "your-key"
    ```
    </TabItem>
    </Tabs>
 
 </Steps>
 
+## Make your first call
+
+This asks whether a customer wants a refund:
+
+<Tabs syncKey="lang">
+<TabItem label="curl">
+```bash
+curl -X POST "$OLAVERSE_URL/v1/decide" \
+  -H "Authorization: Bearer $OLAVERSE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"state": "I was charged twice, please refund me",
+       "questions": {"refund": {"type": "noul", "instructions": "The customer asks for money back."}}}'
+```
+</TabItem>
+<TabItem label="Python">
+```python
+import os, requests
+
+URL = os.environ["OLAVERSE_URL"]
+HEADERS = {"Authorization": f"Bearer {os.environ['OLAVERSE_KEY']}"}
+
+def call(path, body):
+    r = requests.post(f"{URL}{path}", json=body, headers=HEADERS, timeout=120)
+    r.raise_for_status()
+    return r.json()
+
+result = call("/v1/decide", {
+    "state": "I was charged twice, please refund me",
+    "questions": {"refund": {"type": "noul", "instructions": "The customer asks for money back."}},
+})
+print(result["answers"]["refund"]["noul"])   # e.g. 0.97
+```
+</TabItem>
+<TabItem label="JavaScript">
+```js
+const res = await fetch(`${process.env.OLAVERSE_URL}/v1/decide`, {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${process.env.OLAVERSE_KEY}`,
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    state: 'I was charged twice, please refund me',
+    questions: { refund: { type: 'noul', instructions: 'The customer asks for money back.' } },
+  }),
+});
+const result = await res.json();
+console.log(result.answers.refund.noul);   // e.g. 0.97
+```
+</TabItem>
+</Tabs>
+
+<Aside type="note" title="Pricing">
+`purplemist-flash-1.0`, the default decision model, costs <Price model="purplemist-flash-1.0" />. See [Pricing](/reference/billing/).
+</Aside>
+
+A successful call returns the probability that the statement is true, and the usage it was billed on (values are illustrative):
+
+```json
+{
+  "model": "purplemist-flash-1.0",
+  "answers": {"refund": {"type": "noul", "noul": 0.97}},
+  "usage": {"input_tokens": 41, "output_tokens": 0, "decisions": 1}
+}
+```
+
 The rest of these docs use the small `call` helper above in their Python examples.
+
+<Aside type="tip" title="Extracting a document instead?">
+Send a JSON template and the document to `/v1/extract`, and get the template filled in with a confidence for every field:
+
+```bash
+curl -X POST "$OLAVERSE_URL/v1/extract" \
+  -H "Authorization: Bearer $OLAVERSE_KEY" -H "Content-Type: application/json" \
+  -d '{"template": {"recipient": "verbatim-string", "amount": "number", "date": "date"},
+       "text": "Your MTN MoMo transfer of GHS 250.00 to KOFI MENSAH was successful. 14/10/2025",
+       "instructions": "Dates in this message are day/month/year."}'
+```
+
+See [Document extraction](/api/extraction/).
+</Aside>
 
 ## What's available
 
-| What you want | Endpoint | From |
+| What you want | Endpoint | Price |
 | --- | --- | --- |
-| Typed decisions about a message or record | `POST /v1/decide` | $0.02 / 1M input tokens |
-| A document as JSON, with a confidence per field | `POST /v1/extract` | $0.20 / 1M input tokens |
-| The language of a text (608 languages) | `POST /v1/language-id` | $0.05 / 1,000 requests |
-| Diacritics and tone marks restored (11 languages) | `POST /v1/diacritize` | $0.20 / 1M characters |
-| Search-style questions from a passage (25 languages) | `POST /v1/questions/generate` | $0.04 / 1M input tokens |
+| Typed decisions about a message or record | `POST /v1/decide` | <Price model="decide" format="from" /> |
+| A document as JSON, with a confidence per field | `POST /v1/extract` | <Price model="extract" format="from" /> |
+| The language of a text (608 languages) | `POST /v1/language-id` | <Price model="language-id" format="from" /> |
+| Diacritics and tone marks restored (11 languages) | `POST /v1/diacritize` | <Price model="diacritize" format="from" /> |
+| Search-style questions from a passage (25 languages) | `POST /v1/questions/generate` | <Price model="questions" format="from" /> |
 | What's available | `GET /v1/models` | free |
 
 Each POST endpoint also has a `/batch` version. Prices depend on the model; see [Pricing](/reference/billing/).
+
+## Next steps
+
+<CardGrid>
+	<LinkCard title="Decisions" description="Choice, yes/no and score questions, and how to read calibrated probabilities." href="/api/decisions/" />
+	<LinkCard title="Document extraction" description="Templates, field types, photos and per-field confidence." href="/api/extraction/" />
+	<LinkCard title="Inference API" description="Batches, usage, model names and timeouts, common to every endpoint." href="/api/overview/" />
+	<LinkCard title="OpenAI & OpenRouter clients" description="Keep your existing SDK and change the base URL." href="/get-started/compatibility/" />
+</CardGrid>

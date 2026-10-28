@@ -3,18 +3,19 @@ title: Decisions
 description: Typed decisions about a message, ticket or record, with a calibrated probability for every option.
 ---
 
+import Price from '../../../components/Price.astro';
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
 <div class="ola-endpoint">
-	<code>POST /v1/decide</code><code>POST /v1/decide/batch</code><code>POST /v1/systemone</code><code>from $0.02 / 1M tokens</code>
+	<code>POST /v1/decide</code><code>POST /v1/decide/batch</code><code>POST /v1/systemone</code><code><Price model="decide" format="from" /></code>
 </div>
 
 Give the model a piece of **state** (a message, ticket, call transcript or form record) and **typed questions** about it. It returns a calibrated probability for every option, and works in English and eight African languages.
 
 | Model | Size | Use it when | Input / 1M tokens |
 | --- | --- | --- | --- |
-| [`purplemist-flash-1.0`](https://huggingface.co/olaverse/PurpleMIST-Flash-1.0) (default) | 7.9B | You want the highest accuracy, or your input is in an African language. | $0.06 |
-| [`purplemist-mini-1.0`](https://huggingface.co/olaverse/PurpleMIST-Mini-1.0) | 1.9B | Your input is English and you want the same interface at lower cost. | $0.02 |
+| [`purplemist-flash-1.0`](https://huggingface.co/olaverse/PurpleMIST-Flash-1.0) (default) | 7.9B | You want the highest accuracy, or your input is in an African language. | <Price model="purplemist-flash-1.0" format="input" /> |
+| [`purplemist-mini-1.0`](https://huggingface.co/olaverse/PurpleMIST-Mini-1.0) | 1.9B | Your input is English and you want the same interface at lower cost. | <Price model="purplemist-mini-1.0" format="input" /> |
 
 Decision models score every option rather than writing text, so there is no output charge.
 

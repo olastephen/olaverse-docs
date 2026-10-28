@@ -14,6 +14,10 @@ export default defineConfig({
 			logo: { src: './src/assets/logo.png', alt: 'Olaverse Lab' },
 			favicon: '/favicon.ico',
 			customCss: ['./src/styles/olaverse.css'],
+			components: {
+				SiteTitle: './src/components/SiteTitle.astro',
+				Sidebar: './src/components/Sidebar.astro',
+			},
 			social: [
 				{ icon: 'github', label: 'GitHub', href: 'https://github.com/Olaverse-Labs' },
 				{ icon: 'external', label: 'Developer console', href: 'https://console.olaverselab.com' },
@@ -22,9 +26,9 @@ export default defineConfig({
 				{
 					label: 'Get started',
 					items: [
+						{ label: 'Introduction', link: '/' },
 						{ label: 'Quickstart', slug: 'get-started/quickstart' },
-						{ label: 'Authentication', slug: 'get-started/authentication' },
-						{ label: 'OpenAI & OpenRouter clients', slug: 'get-started/compatibility' },
+						{ label: 'Example use cases', slug: 'get-started/use-cases' },
 					],
 				},
 				{
@@ -38,12 +42,27 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Reference',
+					label: 'Inference API',
 					items: [
-						{ label: 'Models and utility endpoints', slug: 'reference/models' },
-						{ label: 'Pricing', slug: 'reference/billing' },
-						{ label: 'Errors', slug: 'reference/errors' },
+						{ label: 'Overview', slug: 'api/overview' },
+						{ label: 'Authentication', slug: 'get-started/authentication' },
+						{ label: 'OpenAI & OpenRouter clients', slug: 'get-started/compatibility' },
 					],
+				},
+				{
+					label: 'Troubleshooting',
+					items: [
+						{ label: 'Errors', slug: 'reference/errors' },
+						{ label: 'Retries and timeouts', slug: 'troubleshooting/retries' },
+					],
+				},
+				{
+					label: 'Models',
+					items: [{ label: 'Model catalog', slug: 'reference/models' }],
+				},
+				{
+					label: 'Account',
+					items: [{ label: 'Pricing', slug: 'reference/billing' }],
 				},
 			],
 		}),

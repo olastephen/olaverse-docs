@@ -1,53 +1,64 @@
 ---
-title: Olaverse API
-description: One API for decisions, document extraction, language identification, diacritic restoration and question generation, built for English and African languages.
-template: splash
-hero:
-  tagline: One API for decisions, document extraction, language identification, diacritics and question generation. Built African-first, open-weight underneath.
-  actions:
-    - text: Quickstart
-      link: /get-started/quickstart/
-      icon: right-arrow
-    - text: Get an API key
-      link: https://console.olaverselab.com
-      icon: external
-      variant: minimal
+title: Introduction
+description: Run decision, extraction and language models built for English and African languages, through one API.
 ---
 
 import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
 
-## What you can build
+Olaverse is an API for specialised language models built African-first. Use **Decisions** to route, flag and score messages with calibrated probabilities, **Document extraction** to turn receipts, mobile-money messages and forms into JSON, and **Language identification**, **Diacritic restoration** and **Question generation** for the text work around them. Every model is open-weight and sits behind one base URL and one API key.
+
+<LinkCard
+	title="Quickstart: make your first call"
+	description="Create an API key, then ask your first decision question in a couple of minutes."
+	href="/get-started/quickstart/"
+/>
+
+## What you can do with Olaverse
 
 <CardGrid>
 	<Card title="Decisions" icon="approve-check-circle">
 		Route, flag and score messages, tickets and records. Every option gets a calibrated probability, in English and eight African languages.
-		[Read more →](/api/decisions/)
+		[Decisions →](/api/decisions/)
 	</Card>
 	<Card title="Document extraction" icon="document">
 		Turn receipts, mobile-money messages, letters and forms into JSON, from text or a photo, with a confidence for every field.
-		[Read more →](/api/extraction/)
+		[Document extraction →](/api/extraction/)
 	</Card>
 	<Card title="Language identification" icon="translate">
 		Identify 608 languages, including on short, messy user input.
-		[Read more →](/api/language-id/)
+		[Language identification →](/api/language-id/)
 	</Card>
 	<Card title="Diacritic restoration" icon="pencil">
 		Put tone marks, accents and Arabic vowel marks back in 11 languages.
-		[Read more →](/api/diacritics/)
+		[Diacritic restoration →](/api/diacritics/)
 	</Card>
 	<Card title="Question generation" icon="question-circle">
 		Turn a passage into search-style questions in its own language, across 25 languages.
-		[Read more →](/api/questions/)
+		[Question generation →](/api/questions/)
 	</Card>
-	<Card title="One key, one base URL" icon="padlock">
-		Every capability sits behind `https://api.olaverselab.com` and the same bearer key.
-		[Authentication →](/get-started/authentication/)
+	<Card title="Use your existing clients" icon="random">
+		Point the OpenAI SDK, OpenRouter, TypeSafe, Ollama or LiteLLM at Olaverse by changing the base URL.
+		[OpenAI & OpenRouter clients →](/get-started/compatibility/)
 	</Card>
 </CardGrid>
 
-## Start here
+## Supported models
+
+| Capability | Models | Languages |
+| --- | --- | --- |
+| Decisions | `purplemist-flash-1.0` (7.9B), `purplemist-mini-1.0` (1.9B) | English and eight African languages (Mini: English) |
+| Document extraction | `mist-extract-1.0` (4B), `mist-extract-flash-1.0` (2B) | English and African languages |
+| Language identification | `lid-neural-608`, `lid-lite-608` | 608 |
+| Diacritic restoration | `diacnet-2.0`, `diacnet-mini-2.0`, `diactag-2.0` | 11 |
+| Question generation | `mist-qg-1.5b` | 25 |
+
+Every model is published on [Hugging Face](https://huggingface.co/olaverse) with a model card. Call `GET /v1/models` for the live list, with each model's status, billing unit and price, or see the [model catalog](/reference/models/).
+
+## Where to next
 
 <CardGrid>
-	<LinkCard title="Quickstart" description="Make your first call in a couple of minutes." href="/get-started/quickstart/" />
+	<LinkCard title="Inference API" description="Base URL, batches, usage and timeouts, common to every endpoint." href="/api/overview/" />
+	<LinkCard title="Example use cases" description="Support routing, payment messages, search and more, built on these models." href="/get-started/use-cases/" />
+	<LinkCard title="Pricing" description="Pay as you go, with $5 of free credit on every new account." href="/reference/billing/" />
 	<LinkCard title="Developer console" description="Create API keys, track usage and try every endpoint in the playground." href="https://console.olaverselab.com" />
 </CardGrid>

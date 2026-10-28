@@ -1,0 +1,185 @@
+---
+// Starlight's SidebarSublist with an icon before each group heading and capability, pages hung off a
+// thin guide line, and the current page marked by accent text and an accent bar on that line.
+import { Badge, Icon } from '@astrojs/starlight/components';
+import SidebarRestorePoint from '@astrojs/starlight/components/SidebarRestorePoint.astro';
+
+type Entries = typeof Astro.locals.starlightRoute.sidebar;
+type Entry = Entries[number];
+
+interface Props {
+	sublist: Entries;
+	nested?: boolean;
+}
+
+const { sublist, nested } = Astro.props;
+
+// Keyed by the sidebar labels in astro.config.mjs; an entry missing here just has no icon.
+const ICONS: Record<string, Parameters<typeof Icon>[0]['name']> = {
+	'Get started': 'rocket',
+	Capabilities: 'puzzle',
+	'Inference API': 'server',
+	Troubleshooting: 'warning',
+	Models: 'star',
+	Account: 'setting',
+	Decisions: 'approve-check-circle',
+	'Document extraction': 'document',
+	'Language identification': 'translate',
+	'Diacritic restoration': 'pencil',
+	'Question generation': 'question-circle',
+};
+
+const hasCurrent = (entry: Entry): boolean =>
+	entry.type === 'link' ? entry.isCurrent : entry.entries.some(hasCurrent);
+---
+
+<ul class:list={{ 'top-level': !nested }}>
+	{
+		sublist.map((entry) => (
+			<li>
+				{entry.type === 'link' ? (
+					<a
+						href={entry.href}
+						aria-current={entry.isCurrent ? 'page' : undefined}
+						class:list={[{ 'top-link': !nested }, entry.attrs.class]}
+						{...entry.attrs}
+					>
+						{ICONS[entry.label] && <Icon name={ICONS[entry.label]!} class="item-icon" />}
+						<span>{entry.label}</span>
+						{entry.badge && (
+							<Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />
+						)}
+					</a>
+				) : (
+					<details open={hasCurrent(entry) || !entry.collapsed}>
+						<summary>
+							<span class="group-label">
+								{ICONS[entry.label] && <Icon name={ICONS[entry.label]!} class="group-icon" />}
+								<span>{entry.label}</span>
+								{entry.badge && (
+									<Badge variant={entry.badge.variant} class={entry.badge.class} text={entry.badge.text} />
+								)}
+							</span>
+							<Icon name="right-caret" class="caret" size="1.1rem" />
+						</summary>
+						<SidebarRestorePoint />
+						<Astro.self sublist={entry.entries} nested />
+					</details>
+				)}
+			</li>
+		))
+	}
+</ul>
+
+<style>
+	ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+	li {
+		overflow-wrap: anywhere;
+	}
+	.top-level > li + li {
+		margin-top: 1.5rem;
+	}
+
+	/* Group heading: icon and label, no box. */
+	summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.2rem 0;
+		margin-bottom: 0.5rem;
+		cursor: pointer;
+		user-select: none;
+		list-style: none;
+	}
+	summary::marker,
+	summary::-webkit-details-marker {
+		display: none;
+	}
+	.group-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.6rem;
+		font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+		font-weight: 600;
+		font-size: var(--sl-text-base);
+		color: var(--sl-color-white);
+	}
+	.group-icon {
+		color: var(--sl-color-gray-2);
+		font-size: 1.1rem;
+		flex-shrink: 0;
+	}
+	.caret {
+		color: var(--sl-color-gray-3);
+		transition: transform 0.2s ease-in-out;
+		flex-shrink: 0;
+	}
+	[open] > summary .caret {
+		transform: rotateZ(90deg);
+	}
+	/* Top-level groups read as section headings; only nested groups show a caret. */
+	.top-level > li > details > summary .caret {
+		display: none;
+	}
+
+	/* Pages hang off a thin guide line under their group. */
+	ul ul {
+		border-inline-start: 1px solid var(--sl-color-hairline-light);
+		margin-inline-start: 0.35rem;
+	}
+	ul ul ul {
+		margin-block: 0.25rem;
+	}
+	ul ul summary {
+		margin-bottom: 0.25rem;
+		padding-inline-start: 1rem;
+	}
+	ul ul .group-label {
+		font-family: var(--sl-font);
+		font-weight: 400;
+		color: var(--sl-color-gray-2);
+	}
+
+	a {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		margin-inline-start: -1px;
+		border-inline-start: 2px solid transparent;
+		padding: 0.4rem 0.5rem 0.4rem 1rem;
+		line-height: 1.35;
+		text-decoration: none;
+		color: var(--sl-color-gray-2);
+		transition: color 0.15s ease, border-color 0.15s ease;
+	}
+	a:hover,
+	a:focus-visible {
+		color: var(--sl-color-white);
+		border-inline-start-color: var(--sl-color-gray-4);
+	}
+	.top-link {
+		margin-inline-start: 0;
+		padding-inline-start: 0.5rem;
+	}
+	.item-icon {
+		color: var(--sl-color-gray-3);
+		font-size: 1.1rem;
+		flex-shrink: 0;
+	}
+
+	/* Current page: accent text and an accent bar on the guide line. */
+	a[aria-current='page'],
+	a[aria-current='page']:hover,
+	a[aria-current='page']:focus-visible {
+		color: var(--sl-color-text-accent);
+		font-weight: 600;
+		border-inline-start-color: var(--sl-color-text-accent);
+	}
+	a[aria-current='page'] .item-icon {
+		color: var(--sl-color-text-accent);
+	}
+</style>

@@ -63,15 +63,9 @@ html {
 	vertical-align: 0.1em;
 }
 
-h1, h2, h3, .site-title, .hero h1 {
+h1, h2, h3, .hero h1 {
 	font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
 	letter-spacing: -0.02em;
-}
-
-.site-title {
-	font-weight: 700;
-	letter-spacing: 0.02em;
-	color: var(--sl-color-white);
 }
 
 /* Brand gradient hairline under the page header (the outer <header> only). */

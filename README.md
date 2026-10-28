@@ -21,7 +21,7 @@ To add a page, create a `.md` or `.mdx` file under `src/content/docs/` and add i
 ## Conventions
 
 - Examples use `https://api.olaverselab.com` and a key from the developer console, never the Modal backend URL, so all traffic goes through the gateway that authenticates and bills it.
-- Prices in `reference/billing.md` and the capability pages mirror `Olaverse-console/src/lib/pricing.ts`; change both together.
+- Prices are never typed into pages. Use `<Price model="…" />` (see `src/components/Price.astro`): it renders the live price from `GET /v1/models` at build time and refreshes it in the browser, so a change on the console's admin page shows without a redeploy. `src/lib/pricing.ts` holds fallback prices for offline builds.
 - Figures and limits come from the API reference. Keep them in step with `Olaverse-console/src/lib/catalog.ts`, which drives the console's docs and playground.
 
 ## Deploying

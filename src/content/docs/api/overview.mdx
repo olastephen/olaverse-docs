@@ -1,0 +1,56 @@
+---
+title: Inference API
+description: The base URL, request format, batches, usage and timeouts shared by every Olaverse endpoint.
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+Every model runs behind one base URL, with the same key and the same request format:
+
+```text
+https://api.olaverselab.com
+```
+
+- Requests and responses are JSON. Send `Content-Type: application/json`.
+- Every `POST` needs your key as a bearer token: `Authorization: Bearer YOUR_API_KEY`. `GET` endpoints are open. See [Authentication](/get-started/authentication/).
+- There is no warm-up step. Models start on demand, so you can call any endpoint straight away.
+
+## Endpoints
+
+| Capability | Endpoint | Batch | Batch limit |
+| --- | --- | --- | --- |
+| [Decisions](/api/decisions/) | `POST /v1/decide` | `POST /v1/decide/batch` | 32 cases |
+| [Document extraction](/api/extraction/) | `POST /v1/extract` | `POST /v1/extract/batch` | 16 documents |
+| [Language identification](/api/language-id/) | `POST /v1/language-id` | `POST /v1/language-id/batch` | 256 texts |
+| [Diacritic restoration](/api/diacritics/) | `POST /v1/diacritize` | `POST /v1/diacritize/batch` | 64 texts |
+| [Question generation](/api/questions/) | `POST /v1/questions/generate` | `POST /v1/questions/generate/batch` | 64 passages |
+| [Model list](/reference/models/) | `GET /v1/models` | | |
+
+The same models are also served at `POST /v1/chat/completions` (OpenAI format) and `POST /v1/systemone` (System One format). See [OpenAI & OpenRouter clients](/get-started/compatibility/).
+
+## Choosing a model
+
+Each endpoint has a default model, and takes an optional `model` field to pick another. Model ids can be given as `olaverse/<name>` too, in any case: `olaverse/MIST-Extract-1.0` and `mist-extract-1.0` are the same model. An unknown model returns `400`. The [model catalog](/reference/models/) lists them all.
+
+## Batches
+
+Batch endpoints take a list in place of a single input and return results in the same order. In decision and extraction batches, give each item an `id` to match results back. Each item succeeds or fails on its own, so one bad item doesn't sink the batch, and only successful items are billed.
+
+## Usage
+
+Every billable response carries a `usage` block with what it was charged on: tokens, texts, characters or documents, depending on the model.
+
+```json
+"usage": {"input_tokens": 312, "output_tokens": 0, "decisions": 3}
+```
+
+See [Pricing](/reference/billing/) for how each unit is counted.
+
+## Timeouts
+
+Give your HTTP client a timeout of about 2 minutes. Most calls return in about a second, but long documents and large batches take longer. See [Retries and timeouts](/troubleshooting/retries/).
+
+<CardGrid>
+	<LinkCard title="Authentication" description="Create, store and revoke API keys." href="/get-started/authentication/" />
+	<LinkCard title="Errors" description="Status codes and what to do about each." href="/reference/errors/" />
+</CardGrid>

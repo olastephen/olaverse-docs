@@ -3,10 +3,11 @@ title: Document extraction
 description: Turn a document (text, photo or screenshot) into JSON, with a calibrated confidence for every field.
 ---
 
+import Price from '../../../components/Price.astro';
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
 <div class="ola-endpoint">
-	<code>POST /v1/extract</code><code>POST /v1/extract/batch</code><code>from $0.20 / 1M tokens</code>
+	<code>POST /v1/extract</code><code>POST /v1/extract/batch</code><code><Price model="extract" format="from" /></code>
 </div>
 
 Send a **template** (the shape of the answer, with a type for each field) and a **document** as text, an image, or both. You get the template filled in, plus a confidence between 0 and 1 for every field.

@@ -1,0 +1,122 @@
+---
+title: Retries and timeouts
+description: Which errors are safe to retry, how to stay inside the rate limit, and how long to wait for a response.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+## Timeouts
+
+Give your HTTP client a timeout of about **2 minutes**. Most calls return in about a second, but long documents and large batches take longer. There is no warm-up step to call first: models start on demand.
+
+## What to retry
+
+| Status | Retry? | Why |
+| --- | --- | --- |
+| `429` | Yes, after a pause | You've hit the rate limit. Wait, then send the same request again. |
+| `502` | Yes | The model service failed. The same request is safe to send again. |
+| `400`, `422` | No | The request is invalid. Fix it; `detail` says what's wrong. |
+| `401` | No | The key is missing or wrong. |
+| `402` | No | Your balance is empty. [Add credit](/reference/billing/#adding-credit) first. |
+| `413` | No | The input is too long. Split it into smaller calls. |
+
+In a batch, each item succeeds or fails on its own. Retry only the items that came back with an `error`, not the whole batch. Sending several inputs as one [batch call](/api/overview/#batches) also uses less of your rate limit than sending them one by one.
+
+## Rate limits
+
+Each account can make **120 requests per minute**. The minute is a rolling window: it counts your requests over the last 60 seconds, so capacity comes back as older requests age out. All of an account's API keys share the one limit. Need more? [Talk to us](https://www.olaverselab.com/contact) about a higher limit.
+
+`GET /v1/models` and `GET /health` allow 3,000 requests per minute, and other calls without a key 300 per minute per IP address.
+
+Every response carries your limit and how much of it is left:
+
+```http
+RateLimit-Limit: 120
+RateLimit-Remaining: 97
+```
+
+When `RateLimit-Remaining` reaches 0, calls return `429`. The `Retry-After` header on it says 900 seconds, but since the window is one minute you can retry after about 60 seconds. A [batch call](/api/overview/#batches) counts as one request however many inputs it carries, so batching is the easiest way to do more inside the limit.
+
+## Retrying with SmartRateLimit
+
+[SmartRateLimit](https://github.com/Olaverse-Labs/smartratelimit) is our open-source Python library for this. It reads the `RateLimit-*` headers above, waits before you run out instead of after, and retries with backoff when a call fails. It wraps `requests`, `httpx` and `aiohttp`.
+
+```bash
+pip install smartratelimit
+```
+
+Tell it to retry `502` as well as `429`, since `502` is the Olaverse status that is safe to retry. Leave `max_delay` at its default of 60 seconds: a `429` carries `Retry-After: 900`, but the rate limit window is one minute, so capacity is back well before that and the 60-second cap is the right wait.
+
+<Tabs syncKey="lang">
+<TabItem label="requests">
+```python
+import os
+from smartratelimit import RateLimiter, RetryConfig
+
+limiter = RateLimiter(retry=RetryConfig(max_retries=3, retry_on_status=[429, 502, 503, 504], jitter=0.1))
+
+URL = os.environ["OLAVERSE_URL"]
+HEADERS = {"Authorization": f"Bearer {os.environ['OLAVERSE_KEY']}"}
+
+def call(path, body):
+    r = limiter.request("POST", f"{URL}{path}", json=body, headers=HEADERS, timeout=120)
+    r.raise_for_status()
+    return r.json()
+```
+</TabItem>
+<TabItem label="httpx (async)">
+```python
+import os, httpx
+from smartratelimit import AsyncRateLimiter, RetryConfig
+
+URL = os.environ["OLAVERSE_URL"]
+HEADERS = {"Authorization": f"Bearer {os.environ['OLAVERSE_KEY']}"}
+
+retry = RetryConfig(max_retries=3, retry_on_status=[429, 502, 503, 504], jitter=0.1)
+
+async def call(limiter, client, path, body):
+    r = await limiter.arequest_httpx(client, "POST", f"{URL}{path}", json=body, headers=HEADERS)
+    r.raise_for_status()
+    return r.json()
+
+async def main():
+    async with AsyncRateLimiter(retry=retry) as limiter, httpx.AsyncClient(timeout=120) as client:
+        result = await call(limiter, client, "/v1/decide", {
+            "state": "I was charged twice, please refund me",
+            "questions": {"refund": {"type": "noul", "instructions": "The customer asks for money back."}},
+        })
+```
+</TabItem>
+</Tabs>
+
+With several threads or workers sending at once, the limiter can overshoot by a few calls before it starts waiting, because responses come back out of order. Those few get a `429`, which it absorbs by waiting, so your code still doesn't see them.
+
+It's a drop-in for the `call` helper from the [Quickstart](/get-started/quickstart/), so the other examples in these docs work unchanged. Other errors such as `400` and `401` come back straight away, without retrying.
+
+<Aside type="tip" title="Several workers sharing one key">
+Each `RateLimiter` keeps its own count by default. If several processes (Gunicorn or Celery workers, for example) share one API key, give them one store so they share one count: `RateLimiter(storage="redis://localhost:6379/0", retry=...)`.
+</Aside>
+
+You can check what it has learned about your limit at any time:
+
+```python
+print(limiter.get_status(URL))   # limit=900, remaining=899, ...
+```
+
+## Without a library
+
+A simple pattern is up to three attempts with a growing pause:
+
+```python
+import time, requests
+
+def call_with_retry(path, body, attempts=3):
+    for i in range(attempts):
+        r = requests.post(f"{URL}{path}", json=body, headers=HEADERS, timeout=120)
+        if r.status_code not in (429, 502) or i == attempts - 1:
+            r.raise_for_status()
+            return r.json()
+        time.sleep(2 ** i)
+```
+
+See [Errors](/reference/errors/) for the full list of status codes and the error body.
