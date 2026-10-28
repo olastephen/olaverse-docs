@@ -1,0 +1,59 @@
+---
+title: Agent skill
+description: Install the Olaverse skill so Claude Code, Cursor and Codex can write correct Olaverse API calls for you.
+---
+
+import { Tabs, TabItem, Aside, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+The Olaverse skill teaches coding agents the API: endpoints, request and response shapes, question and template types, batch limits, rate limits and how to retry. With it installed, you can ask your agent to "triage these support tickets with Olaverse" or "pull the amount and date out of these MoMo messages" and get working code.
+
+## Install
+
+From your project's root:
+
+```bash
+npx skills add https://docs.olaverselab.com --skill olaverse-api
+```
+
+The installer asks which agents should get the skill. Then give your code a key from the [developer console](https://console.olaverselab.com):
+
+```bash
+export OLAVERSE_KEY="your-key"
+```
+
+Ask for what you want in plain words, or call the skill by name with `/olaverse-api`.
+
+## Non-interactive installation
+
+For scripts and CI, name the agent and accept the prompts:
+
+<Tabs>
+<TabItem label="Claude Code">
+```bash
+npx skills add https://docs.olaverselab.com --skill olaverse-api -a claude-code -y
+```
+</TabItem>
+<TabItem label="Cursor">
+```bash
+npx skills add https://docs.olaverselab.com --skill olaverse-api -a cursor -y
+```
+</TabItem>
+<TabItem label="Codex">
+```bash
+npx skills add https://docs.olaverselab.com --skill olaverse-api -a codex -y
+```
+</TabItem>
+</Tabs>
+
+## Install by hand
+
+The skill is one Markdown file. Save [SKILL.md](/.well-known/agent-skills/olaverse-api/SKILL.md) as `.claude/skills/olaverse-api/SKILL.md` in your project (or `~/.claude/skills/olaverse-api/SKILL.md` for every project), or the equivalent folder for your agent.
+
+<Aside type="tip" title="For any AI tool">
+[`/llms.txt`](/llms.txt) lists every page of these docs with a one-line summary, for tools that read documentation directly.
+</Aside>
+
+<CardGrid>
+	<LinkCard title="Cookbooks" description="Complete recipes the skill points your agent to." href="/cookbooks/" />
+	<LinkCard title="Inference API" description="What the skill covers, for humans." href="/api/overview/" />
+</CardGrid>

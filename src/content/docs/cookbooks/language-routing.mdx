@@ -1,0 +1,60 @@
+---
+title: Route messages by language
+description: Identify each message's language, then send it to the right queue, agent or model.
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+**Know what language a message is in before you act on it, and route it to someone, or something, that can read it.**
+
+General-purpose detectors mislabel short African-language messages: a Yorùbá greeting comes back as English, Hausa as "unknown". Language identification covers 608 languages, and its `traffic` mode is tuned for short, messy user input.
+
+## Request
+
+```python
+r = call("/v1/language-id", {"text": "Ina son in canza lambar wayata", "top_k": 3})
+```
+
+## Response
+
+Values are illustrative.
+
+```json
+{
+  "language": "hau", "script": "Latn", "label": "hau_Latn", "language_name": "Hausa",
+  "confidence": 0.98,
+  "top": [{"label": "hau_Latn", "language": "hau", "score": 0.98},
+          {"label": "ful_Latn", "language": "ful", "score": 0.01},
+          {"label": "eng_Latn", "language": "eng", "score": 0.0}],
+  "warnings": [], "model": "lid-neural-608", "mode": "traffic", "usage": {"texts": 1}
+}
+```
+
+## Act on the answer
+
+```python
+QUEUES = {"yor": "yoruba-agents", "hau": "hausa-agents", "ibo": "igbo-agents", "eng": "english-agents"}
+
+def route(message):
+    r = call("/v1/language-id", {"text": message})
+    if r["language"] == "zxx" or r["confidence"] < 0.6:
+        return "general"                       # code, numbers, or too short to tell
+    return QUEUES.get(r["language"], "general")
+```
+
+- **`language` is ISO 639-3** (`yor`, `hau`, `ibo`, `swh`); `label` adds the script (`yor_Latn`).
+- **`zxx_Zxxx` means no language**: the text is code, numbers or symbols.
+- **Low confidence on very short text** ("ok", "hi") is expected. Route those by the conversation's earlier messages, or to a general queue.
+
+## Adapt it
+
+- **Then decide:** pass the detected language into a [decision](/cookbooks/support-ticket-triage/) as part of the state, or use it to pick the language your reply is written in.
+- **Restore tone marks for display:** messages typed without diacritics read better after `POST /v1/diacritize` with the detected `language` (Yorùbá, Igbo, Hausa and 8 others).
+- **Questions in the right language:** [question generation](/api/questions/) needs the passage's language; detect it first.
+- **Fastest and cheapest:** `"model": "lid-lite-608"`. For corpora where every language should count equally, `"mode": "coverage"`.
+- **Many messages:** `POST /v1/language-id/batch` takes 256 texts per call.
+
+<CardGrid>
+	<LinkCard title="Language identification" description="Models, modes and fields." href="/api/language-id/" />
+	<LinkCard title="Language routing use case" description="The full pipeline and benchmark figures." href="https://www.olaverselab.com/use-cases/language-routing" />
+</CardGrid>

@@ -28,6 +28,7 @@ export default defineConfig({
 					items: [
 						{ label: 'Introduction', link: '/' },
 						{ label: 'Quickstart', slug: 'get-started/quickstart' },
+						{ label: 'Agent skill', slug: 'get-started/agent-skill' },
 						{ label: 'Example use cases', slug: 'get-started/use-cases' },
 					],
 				},
@@ -39,6 +40,16 @@ export default defineConfig({
 						{ label: 'Language identification', slug: 'api/language-id' },
 						{ label: 'Diacritic restoration', slug: 'api/diacritics' },
 						{ label: 'Question generation', slug: 'api/questions' },
+					],
+				},
+				{
+					label: 'Cookbooks',
+					items: [
+						{ label: 'Overview', slug: 'cookbooks' },
+						{ label: 'Triage a support ticket', slug: 'cookbooks/support-ticket-triage' },
+						{ label: 'Read a mobile-money message', slug: 'cookbooks/mobile-money-message' },
+						{ label: 'Route messages by language', slug: 'cookbooks/language-routing' },
+						{ label: 'Build an FAQ from articles', slug: 'cookbooks/faq-from-articles' },
 					],
 				},
 				{

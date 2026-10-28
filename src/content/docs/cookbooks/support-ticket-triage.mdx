@@ -1,0 +1,97 @@
+---
+title: Triage a support ticket
+description: Route a message to a team, flag refund requests and score urgency in one decision call.
+---
+
+import { Tabs, TabItem, LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+**Send each incoming ticket to the right team, flag refund requests, and put urgent ones first, with one call.**
+
+Keyword rules miss tickets written in Yorùbá, Pidgin or plain frustration, and a chain of LLM prompts is slow and gives answers you can't threshold. A decision call asks all three questions in one pass and returns a calibrated probability for each, so you can act automatically when the model is sure and hand the rest to a person.
+
+## Request
+
+<Tabs syncKey="lang">
+<TabItem label="Python">
+```python
+ticket = {"channel": "whatsapp",
+          "message": "Ẹ jọ̀ọ́, wọ́n ti yọ owó lẹ́ẹ̀mejì lórí káàdì mi. Mo fẹ́ kí ẹ dá owó mi padà."}
+
+result = call("/v1/decide", {
+    "state": ticket,
+    "questions": {
+        "team":    {"type": "choice", "instructions": "Which team should handle this?",
+                    "criteria": {"billing": "payments, charges and refunds",
+                                 "delivery": "orders in transit, late or missing parcels",
+                                 "account": "sign-in, profile and security"}},
+        "refund":  {"type": "noul", "instructions": "The customer is asking for money back."},
+        "urgency": {"type": "score", "instructions": "How urgent is this?",
+                    "criteria": ["can wait", "normal queue", "today", "immediately"]},
+    },
+})
+```
+</TabItem>
+<TabItem label="curl">
+```bash
+curl -X POST "$OLAVERSE_URL/v1/decide" \
+  -H "Authorization: Bearer $OLAVERSE_KEY" -H "Content-Type: application/json" \
+  -d '{"state": {"channel": "whatsapp", "message": "I was charged twice for order 1182, please refund me today"},
+       "questions": {
+         "team": {"type": "choice", "instructions": "Which team should handle this?",
+                  "criteria": {"billing": "payments, charges and refunds", "delivery": "orders in transit", "account": "sign-in and security"}},
+         "refund": {"type": "noul", "instructions": "The customer is asking for money back."},
+         "urgency": {"type": "score", "instructions": "How urgent is this?",
+                     "criteria": ["can wait", "normal queue", "today", "immediately"]}}}'
+```
+</TabItem>
+</Tabs>
+
+The state can be a string or an object: pass the ticket as you store it. Option keys (`billing`, `delivery`, `account`) are yours; the descriptions are what the model reads, so make them distinct.
+
+## Response
+
+Values are illustrative.
+
+```json
+{
+  "model": "purplemist-flash-1.0",
+  "answers": {
+    "team":    {"type": "choice", "choice": "billing",
+                "probabilities": {"billing": 0.97, "delivery": 0.02, "account": 0.01}, "confidence": 0.88},
+    "refund":  {"type": "noul", "noul": 0.96},
+    "urgency": {"type": "score", "score": 2.1,
+                "probabilities": {"0": 0.03, "1": 0.17, "2": 0.46, "3": 0.34},
+                "legend": {"0": "can wait", "1": "normal queue", "2": "today", "3": "immediately"},
+                "confidence": 0.14}
+  },
+  "usage": {"input_tokens": 312, "output_tokens": 0, "decisions": 3}
+}
+```
+
+## Act on the answer
+
+```python
+a = result["answers"]
+team = a["team"]["choice"] if a["team"]["probabilities"][a["team"]["choice"]] >= 0.9 else "triage"
+priority = "high" if a["urgency"]["score"] >= 2 else "normal"
+
+assign(ticket, queue=team, priority=priority)
+if a["refund"]["noul"] >= 0.9:
+    open_refund_review(ticket)
+```
+
+- **Thresholds mean what they say.** Probabilities are calibrated, so 0.9 is right about 9 times in 10. Start there and tune it against a week of your own tickets.
+- **`score` is the expected level**: 2.1 is "around *today*", with some chance of *immediately*. For the single most likely level, take the highest entry in `probabilities`.
+- **Uncertain goes to a person.** Anything under your threshold lands in a `triage` queue instead of the wrong team.
+
+## Adapt it
+
+- **More teams:** a `choice` question takes up to 255 options.
+- **More questions:** add sentiment, language or "mentions a competitor" to the same call; questions share one pass over the state, so they add no time.
+- **English only, lower cost:** set `"model": "purplemist-mini-1.0"`.
+- **A backlog:** `POST /v1/decide/batch` takes 32 tickets per call and counts as one request against your [rate limit](/troubleshooting/retries/).
+
+<CardGrid>
+	<LinkCard title="Decisions" description="Every question type and field." href="/api/decisions/" />
+	<LinkCard title="Route messages by language" description="Detect the language before you decide." href="/cookbooks/language-routing/" />
+</CardGrid>

@@ -1,0 +1,63 @@
+---
+title: Build an FAQ from help articles
+description: Turn help-centre articles into natural, search-style questions in each article's own language.
+---
+
+import { LinkCard, CardGrid, Aside } from '@astrojs/starlight/components';
+
+**Generate the questions customers would actually type, from the articles you already have, in the language each article is written in.**
+
+An FAQ written by hand drifts from the articles and rarely exists for your Swahili or Yorùbá pages. Question generation reads a passage and writes `n` questions it answers. Detect each article's language first, so the questions come back in it.
+
+## Request
+
+Split long articles into paragraph-sized passages (up to 8,000 characters; a paragraph works best), then:
+
+```python
+def questions_for(passage, n=3):
+    lang = call("/v1/language-id", {"text": passage[:1000]})["language"]
+    return call("/v1/questions/generate", {"passage": passage, "n": n, "language": lang})
+```
+
+## Response
+
+Values are illustrative.
+
+```json
+{
+  "questions": ["How do I reset my M-Pesa PIN?", "What do I need to change my PIN?", "Can I reset my PIN without visiting an agent?"],
+  "language": "eng", "model": "olaverse/mist-qg-1.5b", "warnings": [],
+  "usage": {"input_tokens": 142, "output_tokens": 31, "generations": 1}
+}
+```
+
+## Act on the answer
+
+```python
+faq = []
+for article in articles:
+    for passage in split_into_paragraphs(article.body):
+        r = questions_for(passage)
+        if r["warnings"]:
+            continue                      # very short passage, or a language the model is less sure of
+        faq += [{"question": q, "answer_url": article.url} for q in r["questions"]]
+```
+
+- **Questions stay in the passage's language.** `language` tells the model what the passage is written in; it never translates.
+- **`warnings`** flags a passage too short to work from, or a language the model is less confident in. Skip or review those.
+- **Link each question to its article** rather than writing new answers, so the FAQ never contradicts the source.
+
+<Aside type="tip">
+The same questions make search training data: each (question, passage) pair is a query your retriever should match to that passage.
+</Aside>
+
+## Adapt it
+
+- **Fewer calls:** `POST /v1/questions/generate/batch` takes up to 64 passages in one language per call. Group passages by detected language first.
+- **More or fewer questions:** `n` from 1 to 10.
+- **OpenAI SDK:** the same model answers on `/v1/chat/completions`; see [OpenAI & OpenRouter clients](/get-started/compatibility/).
+
+<CardGrid>
+	<LinkCard title="Question generation" description="Fields, limits and the 25 languages." href="/api/questions/" />
+	<LinkCard title="Retrieval training data use case" description="Fine-tune a retriever on your own corpus." href="https://www.olaverselab.com/use-cases/retrieval-training-data" />
+</CardGrid>

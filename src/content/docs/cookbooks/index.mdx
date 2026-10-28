@@ -1,0 +1,27 @@
+---
+title: Cookbooks
+description: Complete, copy-paste recipes for common jobs on the Olaverse API.
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+Each recipe is one job done end to end: the request, the response, what to do with the answer, and how to adapt it to yours. The Python examples use the `call` helper from the [Quickstart](/get-started/quickstart/).
+
+## Decisions
+
+<CardGrid>
+	<LinkCard title="Triage a support ticket" description="Route a message to a team, flag refunds and score urgency in one call, in English or Yorùbá." href="/cookbooks/support-ticket-triage/" />
+	<LinkCard title="Route messages by language" description="Detect the language first, then send each message to the right queue or model." href="/cookbooks/language-routing/" />
+</CardGrid>
+
+## Extraction
+
+<CardGrid>
+	<LinkCard title="Read a mobile-money message" description="Pull the amount, sender, reference and date out of a MoMo SMS, then check it's genuine." href="/cookbooks/mobile-money-message/" />
+</CardGrid>
+
+## Question generation
+
+<CardGrid>
+	<LinkCard title="Build an FAQ from help articles" description="Turn your help centre into search-style questions, in each article's own language." href="/cookbooks/faq-from-articles/" />
+</CardGrid>

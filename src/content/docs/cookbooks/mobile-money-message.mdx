@@ -1,0 +1,92 @@
+---
+title: Read a mobile-money message
+description: Extract the amount, sender, reference and date from a MoMo or bank SMS, then decide whether it looks genuine.
+---
+
+import { LinkCard, CardGrid } from '@astrojs/starlight/components';
+
+**Turn a pasted or forwarded mobile-money SMS into clean fields, and catch the ones that look fake, before you credit anyone.**
+
+Customers paste payment confirmations as proof. The formats vary by network and country, amounts come with currency codes and separators, and some messages are forged. This recipe makes two calls: extraction fills a template with a confidence per field, then a decision checks the message against what you expected.
+
+## Request: extract the fields
+
+```python
+sms = ("Your MTN MoMo transfer of GHS 250.00 to KOFI MENSAH was successful. "
+       "Fee GHS 2.50. Ref 88213374. 14/10/2025")
+
+extracted = call("/v1/extract", {
+    "template": {
+        "direction": ["sent", "received"],
+        "amount": "number",
+        "currency": "verbatim-string",
+        "counterparty": "verbatim-string",
+        "fee": "number",
+        "reference": "verbatim-string",
+        "date": "date",
+    },
+    "text": sms,
+    "instructions": "Dates in this message are day/month/year.",
+})
+```
+
+`verbatim-string` copies the value exactly as written, so a reference or name is never "tidied". `["sent", "received"]` makes the model pick one.
+
+## Response
+
+Values are illustrative.
+
+```json
+{
+  "model": "mist-extract-1.0",
+  "data": {"direction": "sent", "amount": 250, "currency": "GHS", "counterparty": "KOFI MENSAH",
+           "fee": 2.5, "reference": "88213374", "date": "2025-10-14"},
+  "confidence": {"direction": 0.991, "amount": 0.993, "currency": 0.996, "counterparty": 0.978,
+                 "fee": 0.997, "reference": 0.985, "date": 0.990},
+  "usage": {"documents": 1, "pages": 1}
+}
+```
+
+## Request: check it's genuine
+
+Give the decision model the raw message, what you extracted and what you expected, and ask the questions you'd ask yourself:
+
+```python
+d = extracted["data"]
+check = call("/v1/decide", {
+    "state": {"message": sms, "extracted": d,
+              "expected": {"amount": 250, "currency": "GHS", "payee": "KOFI MENSAH"}},
+    "questions": {
+        "matches": {"type": "noul", "instructions": "The payment in the message matches the expected amount, currency and payee."},
+        "genuine": {"type": "noul", "instructions": "The message reads like a real network confirmation, not an edited or forged one."},
+    },
+})
+```
+
+## Act on the answer
+
+```python
+sure = all(c >= 0.95 for c in extracted["confidence"].values())
+a = check["answers"]
+
+if sure and a["matches"]["noul"] >= 0.9 and a["genuine"]["noul"] >= 0.9:
+    confirm_payment(d["reference"], d["amount"], d["currency"])
+else:
+    send_to_review(sms, extracted, check)
+```
+
+- **Field confidence is calibrated:** at 0.95 a field is right about 95 times in 100. Accept automatically above that and review the rest.
+- **Keep the decision separate from the extraction.** Extraction reads what the message says; the decision judges whether to believe it.
+- **Use the reference to deduplicate.** The same SMS pasted twice should credit once.
+
+## Adapt it
+
+- **Screenshots instead of text:** send `"image": "data:image/png;base64,..."` in place of `text`.
+- **High volume, lower cost:** `"model": "mist-extract-flash-1.0"` is priced per token instead of per document.
+- **Bank and card alerts:** the same template works; add `"balance": "number"` or `"account_last4": "verbatim-string"` as you need.
+- **A day's messages:** `POST /v1/extract/batch` takes 16 per call; only the ones extracted are billed.
+
+<CardGrid>
+	<LinkCard title="Document extraction" description="Template types, images and limits." href="/api/extraction/" />
+	<LinkCard title="Payment messages use case" description="The full pipeline and benchmark figures." href="https://www.olaverselab.com/use-cases/payment-messages" />
+</CardGrid>
