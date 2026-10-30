@@ -35,8 +35,8 @@ export default defineConfig({
 				{
 					label: 'Capabilities',
 					items: [
-						{ label: 'Decisions', slug: 'api/decisions', badge: { text: 'Frontier', variant: 'tip' } },
-						{ label: 'Document extraction', slug: 'api/extraction', badge: { text: 'New', variant: 'success' } },
+						{ label: 'Decisions', slug: 'api/decisions' },
+						{ label: 'Document extraction', slug: 'api/extraction' },
 						{ label: 'Language identification', slug: 'api/language-id' },
 						{ label: 'Diacritic restoration', slug: 'api/diacritics' },
 						{ label: 'Question generation', slug: 'api/questions' },

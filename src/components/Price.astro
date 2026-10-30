@@ -1,8 +1,8 @@
 ---
 // A model price that stays in step with the admin page: rendered from GET /v1/models at build time, then
 // refreshed from the same endpoint in the browser.
-//   <Price model="purplemist-flash-1.0" />                      $0.06 per 1M input tokens, output free
-//   <Price model="purplemist-flash-1.0" format="input" />       $0.06
+//   <Price model="purplemist-flash-1.0" />                      $0.03 per 1M input tokens, output free
+//   <Price model="purplemist-flash-1.0" format="input" />       $0.03
 //   <Price model="decide" format="from" />                      from $0.02 / 1M tokens
 //   <Price model="purplemist-flash-1.0" format="per-1000" tokens={1900} />   $0.11
 import { formatPrice, getBuildPrices, type PriceFormat } from '../lib/pricing';

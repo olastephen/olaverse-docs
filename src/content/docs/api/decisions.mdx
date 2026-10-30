@@ -15,7 +15,6 @@ Give the model a piece of **state** (a message, ticket, call transcript or form 
 | Model | Size | Use it when | Input / 1M tokens |
 | --- | --- | --- | --- |
 | [`purplemist-flash-1.0`](https://huggingface.co/olaverse/PurpleMIST-Flash-1.0) (default) | 7.9B | You want the highest accuracy, or your input is in an African language. | <Price model="purplemist-flash-1.0" format="input" /> |
-| [`purplemist-mini-1.0`](https://huggingface.co/olaverse/PurpleMIST-Mini-1.0) | 1.9B | Your input is English and you want the same interface at lower cost. | <Price model="purplemist-mini-1.0" format="input" /> |
 
 Decision models score every option rather than writing text, so there is no output charge.
 
@@ -55,7 +54,7 @@ curl -X POST "$OLAVERSE_URL/v1/decide" \
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `model` | string | Optional. `purplemist-flash-1.0` (default) or `purplemist-mini-1.0`. The `olaverse/PurpleMIST-Flash-1.0` form works too. |
+| `model` | string | Optional. `purplemist-flash-1.0` (the default and only model). The `olaverse/PurpleMIST-Flash-1.0` form works too. |
 | `state` | string, object or array | The thing being decided about. It must not be empty. |
 | `questions` | object | 1 to 64 questions, keyed by your own IDs. |
 

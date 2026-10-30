@@ -115,7 +115,6 @@ So the script prints `T-1001 {'queue': 'billing', 'priority': 'high', 'refund_re
 
 - **More teams:** a `choice` question takes up to 255 options.
 - **More questions:** add sentiment, language or "mentions a competitor" to `QUESTIONS`; questions share one pass over the state, so they add no time.
-- **English only, lower cost:** add `"model": "purplemist-mini-1.0"` to the request.
 - **A backlog:** `POST /v1/decide/batch` takes 32 tickets per call (`{"cases": [{"id": ..., "state": ..., "questions": ...}]}`) and counts as one request against your [rate limit](/troubleshooting/retries/).
 
 <CardGrid>

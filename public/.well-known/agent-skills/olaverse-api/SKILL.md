@@ -25,7 +25,7 @@ languages.
 
 | Task | Endpoint | Batch (limit) | Models (default first) |
 | --- | --- | --- | --- |
-| Decide: classify, route, flag, score | `POST /v1/decide` | `/v1/decide/batch` (32 cases) | `purplemist-flash-1.0`, `purplemist-mini-1.0` (English, cheaper) |
+| Decide: classify, route, flag, score | `POST /v1/decide` | `/v1/decide/batch` (32 cases) | `purplemist-flash-1.0` |
 | Document to JSON, with per-field confidence | `POST /v1/extract` | `/v1/extract/batch` (16 documents) | `mist-extract-1.0`, `mist-extract-flash-1.0` |
 | Language of a text (608 languages) | `POST /v1/language-id` | `/v1/language-id/batch` (256 texts) | `lid-neural-608`, `lid-lite-608` |
 | Restore diacritics and tone marks (11 languages) | `POST /v1/diacritize` | `/v1/diacritize/batch` (64 texts) | `diacnet-2.0`, `diacnet-mini-2.0`, `diactag-2.0` |
