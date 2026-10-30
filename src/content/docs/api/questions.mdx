@@ -12,12 +12,12 @@ import { Aside } from '@astrojs/starlight/components';
 
 Turns a passage into `n` natural, search-style questions that it answers. Useful for FAQs, study cards and search training data. Powered by [mist-qg-1.5b](https://huggingface.co/olaverse/mist-qg-1.5b).
 
-The questions are always in the **passage's own language**: a Yorùbá passage gives Yorùbá questions. `language` tells the model what language the passage is in; it does not translate.
+The questions are always in the **passage's own language**: a Yorùbá passage gives Yorùbá questions. The language is detected for you; the model does not translate.
 
 ```python
 r = call("/v1/questions/generate", {
     "passage": "Ocean tides are caused mainly by the gravitational pull of the Moon on the Earth...",
-    "n": 3, "language": "English"})
+    "n": 3})
 print(r["questions"])
 ```
 
@@ -27,7 +27,7 @@ print(r["questions"])
 | --- | --- | --- |
 | `passage` | required | 1 to 8,000 characters. Works best at paragraph length. |
 | `n` | `3` | 1 to 10 questions. |
-| `language` | `English` | The passage's language, as a name or code: `yor`, `yo` or `Yoruba`. One of the [25 supported languages](#supported-languages). Set it to match the passage. |
+| `language` | detected | Optional. The passage's language, as a name or code: `yor`, `yo` or `Yoruba`. One of the [25 supported languages](#supported-languages). If the passage is clearly in a different supported language, that one is used and `warnings` says so. |
 
 ## Response
 
@@ -37,11 +37,8 @@ print(r["questions"])
  "usage": {"input_tokens": 96, "output_tokens": 27, "generations": 1}}
 ```
 
-`warnings` flags a very short passage, or a language the model is less confident in.
+`language` is the language the questions are in. `warnings` flags a very short passage, a language the model is less confident in, a passage whose language couldn't be told (the questions are then in English), or a `language` that didn't match the passage.
 
-<Aside type="tip">
-Don't know the passage's language? Call [`/v1/language-id`](/api/language-id/) on it first and pass the language it returns.
-</Aside>
 
 ## Supported languages
 
@@ -49,4 +46,4 @@ Afrikaans, Amharic, Dutch, English, French, German, Hausa, Hindi, Igbo, Indonesi
 
 ## Batch
 
-`POST /v1/questions/generate/batch` with `"passages": [...]` (up to **64**, all in the same language) returns `{"results": [[...], [...]]}`.
+`POST /v1/questions/generate/batch` with `"passages": [...]` (up to **64**, in any mix of supported languages) returns `{"results": [[...], [...]], "languages": [...]}`, with each passage's language in `languages`.
