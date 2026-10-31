@@ -1,6 +1,6 @@
 ---
 title: Question generation
-description: Turn a passage into natural, search-style questions in its own language, across 25 languages.
+description: Bulk search queries from your passages, for training and testing search and RAG systems, in 17 languages, with 8 more in free beta.
 ---
 
 import Price from '../../../components/Price.astro';
@@ -10,7 +10,7 @@ import { Aside } from '@astrojs/starlight/components';
 	<code>POST /v1/questions/generate</code><code>POST /v1/questions/generate/batch</code><code><Price model="questions" format="from" /></code>
 </div>
 
-Turns a passage into `n` natural, search-style questions that it answers. Useful for FAQs, study cards and search training data. Powered by [mist-qg-1.5b](https://huggingface.co/olaverse/mist-qg-1.5b).
+Turns a passage into `n` search-style questions that it answers: the queries a user would type to find it. Built for **training and testing search and RAG systems in bulk**: run your corpus through it to get `(query, passage)` pairs for fine-tuning retrievers and rerankers, or a test set that checks your search finds the right passage. It also works for FAQs and study cards. Powered by [mist-qg-1.5b](https://huggingface.co/olaverse/mist-qg-1.5b).
 
 The questions are always in the **passage's own language**: a Yorùbá passage gives Yorùbá questions. The language is detected for you; the model does not translate.
 
@@ -42,7 +42,15 @@ print(r["questions"])
 
 ## Supported languages
 
-Afrikaans, Amharic, Dutch, English, French, German, Hausa, Hindi, Igbo, Indonesian, Italian, Japanese, Korean, Polish, Portuguese, Russian, Shona, Somali, Spanish, Swahili, Turkish, Vietnamese, Xhosa, Yorùbá and Zulu.
+**Ready (16 languages):** Afrikaans, Dutch, English, French, German, Hindi, Indonesian, Italian, Japanese, Korean, Polish, Portuguese, Russian, Spanish, Turkish, Vietnamese and Xhosa.
+
+**Beta, free (7 languages):** Amharic, Hausa, Igbo, Shona, Somali, Swahili, Yorùbá and Zulu. In these languages the model often restates a sentence of the passage instead of asking about it, so for now they're free, with safeguards:
+
+- Restated sentences are dropped before you get the response, so you may get fewer than `n` questions; `warnings` says how many were dropped.
+- At most **3 questions** per passage.
+- Every response carries a `warnings` entry saying the language is in beta.
+
+We're retraining the model for these languages and will take them out of beta when the questions are good enough to charge for.
 
 ## Batch
 
