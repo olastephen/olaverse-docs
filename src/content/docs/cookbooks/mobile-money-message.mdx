@@ -105,7 +105,7 @@ Every field clears 0.95 and both checks pass, so the script prints `confirmed`.
 ## Adapt it
 
 - **Screenshots instead of text:** send `"image": "data:image/png;base64,..."` in place of `"text"`.
-- **High volume, lower cost:** add `"model": "mist-extract-flash-1.0"`, priced per token instead of per document.
+- **High volume, lower cost:** add `"model": "mist-extract-flash-1.0"`: faster, at less than half the price per document.
 - **Bank and card alerts:** the same approach works; add `"balance": "number"` or `"account_last4": "verbatim-string"` to `TEMPLATE`.
 - **A day's messages:** `POST /v1/extract/batch` takes 16 per call; only the ones extracted are billed.
 

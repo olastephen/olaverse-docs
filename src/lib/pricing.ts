@@ -19,7 +19,7 @@ export type PriceTable = Record<string, Price>;
 export const DEFAULT_PRICES: PriceTable = {
 	'purplemist-flash-1.0': { unit: 'tokens', input: 0.03, output: null },
 	'mist-extract-1.0': { unit: 'documents', price: 2.5, per: 1_000, pagesIncluded: 5, extraPagePrice: 0.5 },
-	'mist-extract-flash-1.0': { unit: 'tokens', input: 0.2, output: null },
+	'mist-extract-flash-1.0': { unit: 'documents', price: 1, per: 1_000, pagesIncluded: 5, extraPagePrice: 0.25 },
 	'mist-qg-1.5b': { unit: 'tokens', input: 0.04, output: 0.12 },
 	'lid-neural-608': { unit: 'requests', price: 0.3, per: 1_000 },
 	'lid-lite-608': { unit: 'requests', price: 0.05, per: 1_000 },
