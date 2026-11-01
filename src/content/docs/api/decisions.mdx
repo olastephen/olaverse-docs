@@ -1,6 +1,6 @@
 ---
 title: Decisions
-description: Typed decisions about a message, ticket or record, with a calibrated probability for every option.
+description: Typed decisions about a message, ticket, record, receipt or screenshot, with a calibrated probability for every option.
 ---
 
 import Price from '../../../components/Price.astro';
@@ -10,13 +10,30 @@ import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 	<code>POST /v1/decide</code><code>POST /v1/decide/batch</code><code>POST /v1/systemone</code><code><Price model="decide" format="from" /></code>
 </div>
 
-Give the model a piece of **state** (a message, ticket, call transcript or form record) and **typed questions** about it. It returns a calibrated probability for every option, and works in English, eight African languages and ten other major languages.
+Give the model a piece of **state** (a message, ticket, call transcript, form record, or an image such as a receipt or screenshot) and **typed questions** about it. It answers every question in one pass, with a calibrated probability for every option.
 
-| Model | Size | Use it when | Input / 1M tokens |
-| --- | --- | --- | --- |
-| [`purplemist-mini-2.0`](https://huggingface.co/olaverse/PurpleMIST-Mini-2.0) (default) | 4.5B | Typed decisions in 19 languages, with the accuracy of the 7.9B PurpleMIST-Flash-1.0 at half the size. | <Price model="purplemist-mini-2.0" format="input" /> |
+| Model | Size | Input / 1M tokens |
+| --- | --- | --- |
+| [`purplemist-mini-2.0`](https://huggingface.co/olaverse/PurpleMIST-Mini-2.0) | 4.5B | <Price model="purplemist-mini-2.0" format="input" /> |
 
 Decision models score every option rather than writing text, so there is no output charge.
+
+## What PurpleMIST-Mini-2.0 can do
+
+- **Answer many questions at once.** Up to 64 questions per call, of three types: pick one of several options (`choice`), say how likely a statement is true (`noul`), or place the state on a scale (`score`). They share one pass over the state, so extra questions cost almost nothing.
+- **Read images.** Send receipts, invoices, screenshots or photos, alone or with text. A call can carry up to 4 images, which the model reads in order. It is 0.984 accurate on held-out receipts and 0.907 on screenshots and real photos.
+- **Work in 19 languages.** English; Amharic, Hausa, Igbo, Nigerian Pidgin, Somali, Swahili, Yorùbá and isiZulu; and Arabic, Chinese, French, German, Hindi, Indonesian, Portuguese, Russian, Spanish and Turkish.
+- **Ask in a different language from the input.** Write your questions once, in English say, and use them on messages in any of the 19 languages (0.937 accuracy on held-out cross-language questions).
+- **Give probabilities you can act on.** Each question type is calibrated separately for text and images, so an answer given 0.9 is right close to 9 times in 10. Set thresholds on them: act automatically when the model is sure, and send the rest to a person.
+- **Read long inputs whole.** Transcripts, logs and case files of up to 32,768 tokens are read in full, never cut short.
+- **Accuracy.** 0.723 on LocalLLaMA/typed-decisions (English, zero-shot), 0.636 on African Typed Decisions across 8 languages, 46.5 on the Jev Decision Index text suite and 63.7 on its vision suite. That is the accuracy of the 7.9B PurpleMIST-Flash-1.0 on text, at about half the size.
+
+### Good fits
+
+- Routing and triaging support tickets, chats and emails: which team, how urgent, is it a complaint.
+- Checking receipts and payment screenshots: does the total add up, is this a genuine bank or mobile-money confirmation.
+- Moderation, fraud and KYC checks where you need a probability, not just a label.
+- Replacing chains of prompted LLM calls that each answer one yes/no question.
 
 ## Example
 
@@ -50,12 +67,33 @@ curl -X POST "$OLAVERSE_URL/v1/decide" \
 </TabItem>
 </Tabs>
 
+### With an image
+
+```python
+import base64
+
+with open("receipt.jpg", "rb") as f:
+    receipt = "data:image/jpeg;base64," + base64.b64encode(f.read()).decode()
+
+result = call("/v1/decide", {
+    "state": {"note": "Customer says this is the receipt for their refund claim."},   # optional with images
+    "images": [receipt],
+    "questions": {
+        "total_ok": {"type": "noul", "instructions": "The receipt total matches the sum of its line items."},
+        "category": {"type": "choice", "instructions": "What kind of purchase is this?",
+                     "criteria": {"food": "groceries or restaurant", "transport": "fuel, taxi or tickets",
+                                  "other": "anything else"}},
+    },
+})
+```
+
 ## Request
 
 | Field | Type | Notes |
 | --- | --- | --- |
 | `model` | string | Optional. `purplemist-mini-2.0` (the default and only model). The `olaverse/PurpleMIST-Mini-2.0` form works too. |
-| `state` | string, object or array | The thing being decided about. It must not be empty. |
+| `state` | string, object or array | The thing being decided about. It must not be empty unless you send `images`. |
+| `images` | array of strings | Optional. Up to 4 images as base64 or data URLs (`data:image/png;base64,...`), up to 10 MB each. Links are not fetched. |
 | `questions` | object | 1 to 64 questions, keyed by your own IDs. |
 
 ### Question types
@@ -92,7 +130,8 @@ Values are illustrative.
 - **`score` is the expected level.** 1.9 means "close to *today*". For the single most likely level, take the highest entry in `probabilities`.
 - **`confidence` measures how peaked the distribution is** (0 = no idea, 1 = certain). It is not a second probability.
 - **Ask several questions at once.** They share one pass over the state, so they cost no extra time.
-- **Long inputs are never truncated.** A state of up to 65,536 tokens is read whole. Anything longer returns `413` with a "maximum context length" message, so split it into separate calls.
+- **Long inputs are never truncated.** A state of up to 32,768 tokens, images included, is read whole. Anything longer returns `413` with a "maximum context length" message, so split it into separate calls.
+- **Images count as input tokens.** One token is a 32 × 32 pixel patch, and each image is scaled to at most 1,024 tokens (about one megapixel), so an image costs at most about <Price model="purplemist-mini-2.0" format="per-1000" tokens={1024} /> per 1,000 images.
 
 ## Batch
 
