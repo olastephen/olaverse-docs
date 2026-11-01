@@ -20,7 +20,6 @@ All Olaverse models are open-weight and published on [Hugging Face](https://hugg
 | Model | Size | Notes |
 | --- | --- | --- |
 | [`mist-extract-1.0`](https://huggingface.co/olaverse/MIST-Extract-1.0) (default) | 4B | Most accurate. |
-| [`mist-extract-flash-1.0`](https://huggingface.co/olaverse/MIST-Extract-Flash-1.0) | 2B | Faster. |
 
 ## Language identification
 

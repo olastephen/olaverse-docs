@@ -66,7 +66,7 @@ r = call("/v1/extract", {
 | `text` | | The document as text, up to 60,000 characters. Give `text`, `image` or both. |
 | `image` | | One JPEG or PNG as base64 or a data URL, up to 10 MB. Large photos are scaled down automatically. |
 | `instructions` | | Optional guidance, such as "Dates are day/month/year" or "amounts in kobo". |
-| `model` | `mist-extract-1.0` | `mist-extract-1.0` (4B, most accurate) or `mist-extract-flash-1.0` (2B, faster). |
+| `model` | `mist-extract-1.0` | `mist-extract-1.0`, the only extraction model on the API. `mist-extract-flash-1.0` is still accepted and runs `mist-extract-1.0`. |
 
 ### Template types
 
@@ -100,7 +100,7 @@ When the model's answer isn't valid JSON (rare), you get status `200` with `"dat
 `POST /v1/extract/batch` takes up to **16 documents**:
 
 ```json
-{"model": "mist-extract-flash-1.0",
+{"model": "mist-extract-1.0",
  "documents": [{"id": "a", "template": {...}, "text": "..."},
                {"id": "b", "template": {...}, "image": "data:image/png;base64,..."}]}
 ```
@@ -108,11 +108,21 @@ When the model's answer isn't valid JSON (rare), you get status `200` with `"dat
 Each document succeeds or fails on its own. An invalid document comes back with `"error"` and `"status": 400` in its place, and only extracted documents are billed:
 
 ```json
-{"model": "mist-extract-flash-1.0",
+{"model": "mist-extract-1.0",
  "results": [{"id": "a", "data": {...}, "confidence": {...}},
              {"id": "b", "data": null, "confidence": null, "error": "give the document as 'text', 'image' ...", "status": 400}],
  "usage": {"input_tokens": 230, "output_tokens": 41, "documents": 1}}
 ```
+
+## Pricing
+
+Extraction is charged per token, like the rest of the token-priced models: <Price model="mist-extract-1.0" />.
+
+- **Input tokens** are the template, any instructions and the document. A page of English text is about 1,000 tokens (one word is about 1.3 tokens). An image token is a 32 × 32 pixel patch, and images are scaled to about 1.3 megapixels, so a photo or A4 scan is at most about 1,300 tokens.
+- **Output tokens** are the JSON the model writes, typically 50 to 300 for a receipt or a payment message.
+- A one-page text receipt costs about $0.0015 and a photo of an A4 page about $0.002. Each request is charged for at least 500 input tokens, and documents that fail or come back as invalid JSON are not charged.
+
+`usage` in every response shows the tokens you were charged for.
 
 ## Speed
 

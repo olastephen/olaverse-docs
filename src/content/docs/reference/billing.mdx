@@ -11,13 +11,12 @@ Pricing is pay as you go. You add credit to your account, and each call is deduc
 
 ## Prices
 
-Prices are in US dollars. Each model is charged in the unit that fits what it does: tokens for models that read and write text, requests for language identification, characters for diacritics, and documents for MIST-Extract-1.0.
+Prices are in US dollars. Each model is charged in the unit that fits what it does: tokens for models that read and write text or documents, requests for language identification, and characters for diacritics.
 
 | Model | Endpoint | Price |
 | --- | --- | --- |
 | `purplemist-mini-2.0` | `/v1/decide` | <Price model="purplemist-mini-2.0" /> |
 | `mist-extract-1.0` | `/v1/extract` | <Price model="mist-extract-1.0" /> |
-| `mist-extract-flash-1.0` | `/v1/extract` | <Price model="mist-extract-flash-1.0" /> |
 | `mist-qg-1.5b` | `/v1/questions/generate` | <Price model="mist-qg-1.5b" /> |
 | `lid-neural-608` | `/v1/language-id` | <Price model="lid-neural-608" /> |
 | `lid-lite-608` | `/v1/language-id` | <Price model="lid-lite-608" /> |
@@ -25,7 +24,7 @@ Prices are in US dollars. Each model is charged in the unit that fits what it do
 | `diacnet-mini-2.0` | `/v1/diacritize` | <Price model="diacnet-mini-2.0" /> |
 | `diactag-2.0` | `/v1/diacritize` | <Price model="diactag-2.0" /> |
 
-For scale: a typical decision of about 1,900 tokens on `purplemist-mini-2.0` costs about <Price model="purplemist-mini-2.0" format="per-1000" tokens={1900} /> per 1,000 decisions.
+For scale: a typical decision of about 1,900 tokens on `purplemist-mini-2.0` costs about <Price model="purplemist-mini-2.0" format="per-1000" tokens={1900} /> per 1,000 decisions, and a one-page text receipt on `mist-extract-1.0` (about 1,300 tokens in, 120 out) about $0.0015.
 
 These prices are read live from [`GET /v1/models`](/reference/models/#utility-endpoints), so they are always the ones you are charged.
 
@@ -33,13 +32,12 @@ These prices are read live from [`GET /v1/models`](/reference/models/#utility-en
 
 ## How each call is charged
 
-- **Tokens.** Input tokens are everything you send the model: the state and questions, the template and document (images included), or the passage. Output tokens are what it writes. Decisions and MIST-Extract-Flash charge input only. Asking more decision questions about the same state adds only the questions' own tokens, because they share one pass over the state.
+- **Tokens.** Input tokens are everything you send the model: the state and questions, the template and document (images included), or the passage. Output tokens are what it writes. Decisions charge input only. For documents, an image token is a 32 × 32 pixel patch, and an image is at most about 1,300 tokens. Asking more decision questions about the same state adds only the questions' own tokens, because they share one pass over the state.
 - **Requests.** Each language-ID request is one text of up to 1,000 characters. In a batch, each text counts as one request.
 - **Characters.** Diacritics are charged on the characters of text you send.
-- **Documents.** MIST-Extract-1.0 is charged per document extracted, flat up to 5 pages. An image is one page, and so is each 3,000 characters of text; pages beyond 5 cost $0.50 per 1,000. `usage.pages` shows the count.
 - **Minimum per request.** Each request costs at least one unit, or 500 tokens on token-priced models.
 
-Every response carries a `usage` block with the tokens, texts, characters or documents it was charged on.
+Every response carries a `usage` block with the tokens, texts or characters it was charged on.
 
 ## What isn't charged
 
