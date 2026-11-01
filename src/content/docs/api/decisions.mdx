@@ -25,7 +25,7 @@ Decision models score every option rather than writing text, so there is no outp
 - **Work in 19 languages.** English; Amharic, Hausa, Igbo, Nigerian Pidgin, Somali, Swahili, Yorùbá and isiZulu; and Arabic, Chinese, French, German, Hindi, Indonesian, Portuguese, Russian, Spanish and Turkish.
 - **Ask in a different language from the input.** Write your questions once, in English say, and use them on messages in any of the 19 languages (0.937 accuracy on held-out cross-language questions).
 - **Give probabilities you can act on.** Each question type is calibrated separately for text and images, so an answer given 0.9 is right close to 9 times in 10. Set thresholds on them: act automatically when the model is sure, and send the rest to a person.
-- **Read long inputs whole.** Transcripts, logs and case files of up to 32,768 tokens are read in full, never cut short.
+- **Read long inputs whole.** Transcripts, logs and case files of up to 27,000 tokens are read in full, never cut short.
 - **Accuracy.** 0.723 on LocalLLaMA/typed-decisions (English, zero-shot), 0.636 on African Typed Decisions across 8 languages, 46.5 on the Jev Decision Index text suite and 63.7 on its vision suite. That is the accuracy of the 7.9B PurpleMIST-Flash-1.0 on text, at about half the size.
 
 ### Good fits
@@ -130,7 +130,7 @@ Values are illustrative.
 - **`score` is the expected level.** 1.9 means "close to *today*". For the single most likely level, take the highest entry in `probabilities`.
 - **`confidence` measures how peaked the distribution is** (0 = no idea, 1 = certain). It is not a second probability.
 - **Ask several questions at once.** They share one pass over the state, so they cost no extra time.
-- **Long inputs are never truncated.** A state of up to 32,768 tokens, images included, is read whole. Anything longer returns `413` with a "maximum context length" message, so split it into separate calls.
+- **Long inputs are never truncated.** A state of up to 27,000 tokens, images included, is read whole. Anything longer returns `413` with a "maximum context length" message, so split it into separate calls.
 - **Images count as input tokens.** One token is a 32 × 32 pixel patch, and each image is scaled to at most 1,024 tokens (about one megapixel), so an image costs at most about <Price model="purplemist-mini-2.0" format="per-1000" tokens={1024} /> per 1,000 images.
 
 ## Batch
