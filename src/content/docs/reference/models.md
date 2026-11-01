@@ -11,7 +11,7 @@ All Olaverse models are open-weight and published on [Hugging Face](https://hugg
 
 | Model | Size | Notes |
 | --- | --- | --- |
-| [`purplemist-flash-1.0`](https://huggingface.co/olaverse/PurpleMIST-Flash-1.0) (default) | 7.9B | Highest accuracy; English and eight African languages. Up to 65,536 tokens of state. |
+| [`purplemist-mini-2.0`](https://huggingface.co/olaverse/PurpleMIST-Mini-2.0) (default) | 4.5B | English, eight African languages and ten other major languages; Flash-1.0 accuracy at half the size. Up to 65,536 tokens of state. |
 
 ## Document extraction
 

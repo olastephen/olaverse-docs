@@ -17,7 +17,7 @@ export type PriceTable = Record<string, Price>;
 /** Stand-ins when the API can't be reached (an offline build, or the script failing). Keep them roughly in
  *  step with DEFAULT_PRICES in the console. */
 export const DEFAULT_PRICES: PriceTable = {
-	'purplemist-flash-1.0': { unit: 'tokens', input: 0.03, output: null },
+	'purplemist-mini-2.0': { unit: 'tokens', input: 0.03, output: null },
 	'mist-extract-1.0': { unit: 'documents', price: 2.5, per: 1_000, pagesIncluded: 5, extraPagePrice: 0.5 },
 	'mist-extract-flash-1.0': { unit: 'documents', price: 1, per: 1_000, pagesIncluded: 5, extraPagePrice: 0.25 },
 	'mist-qg-1.5b': { unit: 'tokens', input: 0.04, output: 0.12 },
@@ -30,7 +30,7 @@ export const DEFAULT_PRICES: PriceTable = {
 
 /** The models behind each capability, for "from …" labels. */
 export const CAPABILITY_MODELS: Record<string, string[]> = {
-	decide: ['purplemist-flash-1.0'],
+	decide: ['purplemist-mini-2.0'],
 	extract: ['mist-extract-1.0', 'mist-extract-flash-1.0'],
 	'language-id': ['lid-neural-608', 'lid-lite-608'],
 	diacritize: ['diacnet-2.0', 'diacnet-mini-2.0', 'diactag-2.0'],

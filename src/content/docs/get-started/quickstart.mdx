@@ -92,14 +92,14 @@ console.log(result.answers.refund.noul);   // e.g. 0.97
 </Tabs>
 
 <Aside type="note" title="Pricing">
-`purplemist-flash-1.0`, the default decision model, costs <Price model="purplemist-flash-1.0" />. See [Pricing](/reference/billing/).
+`purplemist-mini-2.0`, the default decision model, costs <Price model="purplemist-mini-2.0" />. See [Pricing](/reference/billing/).
 </Aside>
 
 A successful call returns the probability that the statement is true, and the usage it was billed on (values are illustrative):
 
 ```json
 {
-  "model": "purplemist-flash-1.0",
+  "model": "purplemist-mini-2.0",
   "answers": {"refund": {"type": "noul", "noul": 0.97}},
   "usage": {"input_tokens": 41, "output_tokens": 0, "decisions": 1}
 }

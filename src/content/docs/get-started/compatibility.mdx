@@ -10,7 +10,7 @@ Olaverse speaks the two formats most AI clients already use, so you can switch b
 | Format | Endpoint | Models | Works with |
 | --- | --- | --- | --- |
 | OpenAI chat completions | `POST /v1/chat/completions` | `mist-qg-1.5b`, `mist-extract-1.0`, `mist-extract-flash-1.0` | OpenAI SDKs, OpenRouter-style clients, anything that takes an OpenAI base URL |
-| System One decisions | `POST /v1/systemone` | `purplemist-flash-1.0` | TypeSafe SDK, OpenRouter's System One API, Ollama, LiteLLM |
+| System One decisions | `POST /v1/systemone` | `purplemist-mini-2.0` | TypeSafe SDK, OpenRouter's System One API, Ollama, LiteLLM |
 
 Model ids can be given as `olaverse/<name>` too, in any case: `olaverse/MIST-Extract-1.0` and `mist-extract-1.0` are the same model.
 
@@ -97,14 +97,14 @@ Every model on `/v1/chat/completions` supports `"stream": true`. The last chunk 
 # Only the client settings and the model name change; your calls stay the same.
 client = TypeSafeClient(api_key=os.environ["OLAVERSE_KEY"],
                         base_url="https://api.olaverselab.com")   # was https://openrouter.ai/api
-MODEL = "olaverse/purplemist-flash-1.0"                           # was typesafe/jev-1.14
+MODEL = "olaverse/purplemist-mini-2.0"                           # was typesafe/jev-1.14
 ```
 </TabItem>
 <TabItem label="Plain HTTP">
 ```bash
 curl "$OLAVERSE_URL/v1/systemone" \
   -H "Authorization: Bearer $OLAVERSE_KEY" -H "Content-Type: application/json" \
-  -d '{"model": "olaverse/purplemist-flash-1.0", "state": "I was charged twice, please refund me",
+  -d '{"model": "olaverse/purplemist-mini-2.0", "state": "I was charged twice, please refund me",
        "questions": {"refund": {"type": "noul", "instructions": "The customer asks for money back."}}}'
 ```
 </TabItem>

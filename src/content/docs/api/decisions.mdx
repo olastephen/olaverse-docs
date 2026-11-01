@@ -10,11 +10,11 @@ import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 	<code>POST /v1/decide</code><code>POST /v1/decide/batch</code><code>POST /v1/systemone</code><code><Price model="decide" format="from" /></code>
 </div>
 
-Give the model a piece of **state** (a message, ticket, call transcript or form record) and **typed questions** about it. It returns a calibrated probability for every option, and works in English and eight African languages.
+Give the model a piece of **state** (a message, ticket, call transcript or form record) and **typed questions** about it. It returns a calibrated probability for every option, and works in English, eight African languages and ten other major languages.
 
 | Model | Size | Use it when | Input / 1M tokens |
 | --- | --- | --- | --- |
-| [`purplemist-flash-1.0`](https://huggingface.co/olaverse/PurpleMIST-Flash-1.0) (default) | 7.9B | You want the highest accuracy, or your input is in an African language. | <Price model="purplemist-flash-1.0" format="input" /> |
+| [`purplemist-mini-2.0`](https://huggingface.co/olaverse/PurpleMIST-Mini-2.0) (default) | 4.5B | Typed decisions in 19 languages, with the accuracy of the 7.9B PurpleMIST-Flash-1.0 at half the size. | <Price model="purplemist-mini-2.0" format="input" /> |
 
 Decision models score every option rather than writing text, so there is no output charge.
 
@@ -54,7 +54,7 @@ curl -X POST "$OLAVERSE_URL/v1/decide" \
 
 | Field | Type | Notes |
 | --- | --- | --- |
-| `model` | string | Optional. `purplemist-flash-1.0` (the default and only model). The `olaverse/PurpleMIST-Flash-1.0` form works too. |
+| `model` | string | Optional. `purplemist-mini-2.0` (the default and only model). The `olaverse/PurpleMIST-Mini-2.0` form works too. |
 | `state` | string, object or array | The thing being decided about. It must not be empty. |
 | `questions` | object | 1 to 64 questions, keyed by your own IDs. |
 
@@ -72,7 +72,7 @@ Values are illustrative.
 
 ```json
 {
-  "model": "purplemist-flash-1.0",
+  "model": "purplemist-mini-2.0",
   "answers": {
     "team":    {"type": "choice", "choice": "billing",
                 "probabilities": {"billing": 0.98, "delivery": 0.02}, "confidence": 0.86},
@@ -92,7 +92,7 @@ Values are illustrative.
 - **`score` is the expected level.** 1.9 means "close to *today*". For the single most likely level, take the highest entry in `probabilities`.
 - **`confidence` measures how peaked the distribution is** (0 = no idea, 1 = certain). It is not a second probability.
 - **Ask several questions at once.** They share one pass over the state, so they cost no extra time.
-- **Long inputs are never truncated.** A state of up to 65,536 tokens on Flash, or 8,192 on Mini, is read whole. Anything longer returns `413` with a "maximum context length" message, so split it into separate calls.
+- **Long inputs are never truncated.** A state of up to 65,536 tokens is read whole. Anything longer returns `413` with a "maximum context length" message, so split it into separate calls.
 
 ## Batch
 
