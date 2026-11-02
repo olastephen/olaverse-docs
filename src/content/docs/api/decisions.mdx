@@ -93,16 +93,39 @@ result = call("/v1/decide", {
 | --- | --- | --- |
 | `model` | string | Optional. `purplemist-mini-2.0` (the default and only model). The `olaverse/PurpleMIST-Mini-2.0` form works too. |
 | `state` | string, object or array | The thing being decided about. It must not be empty unless you send `images`. |
-| `images` | array of strings | Optional. Up to 4 images as base64 or data URLs (`data:image/png;base64,...`), up to 10 MB each. Links are not fetched. |
+| `images` | array of strings | Optional. Up to 4 images as base64 or data URLs (`data:image/png;base64,...`), up to 16 MB each. Links are not fetched. |
+| `assets` | object | Optional. Images in the System One format, referenced from the state, instructions or criteria. See [System One assets](#system-one-assets). |
 | `questions` | object | 1 to 64 questions, keyed by your own IDs. |
+
+`instructions` and criteria descriptions can be strings, JSON objects or arrays. `instructions` is optional for `choice` and `score`. Request bodies can be gzip or zstd compressed (`Content-Encoding`), up to 32 MB.
 
 ### Question types
 
 | `type` | `criteria` | You get back |
 | --- | --- | --- |
-| `choice` | 2 to 255 option keys, each mapped to a description (or `null`) | `choice` (best key), `probabilities`, `confidence` |
-| `noul` | Optional; only `true` / `false` keys | `noul`: the probability the statement is true |
-| `score` | A list of 2 to 26 level descriptions, lowest first | `score` (expected level), `probabilities`, `legend`, `confidence` |
+| `choice` | 1 to 255 option keys, each mapped to a description (or `null`) | `choice` (best key), `probabilities`, `confidence` |
+| `noul` | Optional; `true` and/or `false` descriptions of when the statement holds | `noul`: the probability the statement is true |
+| `score` | A list of 1 to 26 level descriptions, lowest first | `score` (expected level), `probabilities`, `legend`, `confidence` |
+
+`box` questions are not supported; they return `400`.
+
+### System One assets
+
+Code written for System One works unchanged on `POST /v1/systemone`. Put a reference string where the image belongs, and the image under `assets`:
+
+```json
+{
+  "state": {"photo": "a3f1c2e8-found", "note": "Customer says the parcel arrived damaged."},
+  "assets": {"a3f1c2e8-found": {"type": "image", "format": "jpg", "data_base64": "/9j/4AAQ..."}},
+  "questions": {"damaged": {"type": "noul", "instructions": "The parcel in the photo is damaged."}}
+}
+```
+
+- `format` is `png`, `jpg` or `jpeg`; `data_base64` is plain base64, without a `data:` prefix.
+- Use unique references such as UUIDs. Every asset must be referenced somewhere, or the request returns `400`.
+- Images can also be sent as multipart: a `request` part holding the JSON, and one part per image, named by the asset's `part` field.
+- The model reads images before the state, in the order they are first referenced; each reference becomes `[image 1]`, `[image 2]` and so on. Up to 4 images per request, counting `images` and `assets` together.
+- The `TypeSafe-Danger-Zone-Images` header is accepted and not needed.
 
 ## Response
 
