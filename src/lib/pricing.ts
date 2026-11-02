@@ -17,7 +17,7 @@ export type PriceTable = Record<string, Price>;
 /** Stand-ins when the API can't be reached (an offline build, or the script failing). Keep them roughly in
  *  step with DEFAULT_PRICES in the console. */
 export const DEFAULT_PRICES: PriceTable = {
-	'purplemist-mini-2.0': { unit: 'tokens', input: 0.03, output: null },
+	'purplemist-mini-2.0': { unit: 'tokens', input: 0.02, output: null },
 	'mist-extract-1.0': { unit: 'tokens', input: 0.8, output: 4 },
 	'mist-qg-1.5b': { unit: 'tokens', input: 0.04, output: 0.12 },
 	'lid-neural-608': { unit: 'requests', price: 0.3, per: 1_000 },
@@ -90,7 +90,7 @@ const pagesNote = (p: Price) =>
 		? `, up to ${p.pagesIncluded} pages each; extra pages ${money(p.extraPagePrice ?? 0)} per 1,000`
 		: '';
 
-/** "$0.03 per 1M input tokens, output free", "$0.04 in · $0.12 out per 1M tokens", "$0.30 per 1,000 requests". */
+/** "$0.02 per 1M input tokens, output free", "$0.04 in · $0.12 out per 1M tokens", "$0.30 per 1,000 requests". */
 function line(p: Price) {
 	if (p.unit !== 'tokens') return `${money(p.price)} per ${per(p.per)} ${p.unit}${pagesNote(p)}`;
 	return p.output === null
@@ -112,7 +112,7 @@ function from(models: string[], table: PriceTable) {
 export type PriceFormat =
 	/** The full price phrase for a model. */
 	| 'line'
-	/** The input price per 1M tokens alone, e.g. "$0.03". */
+	/** The input price per 1M tokens alone, e.g. "$0.02". */
 	| 'input'
 	/** "from …" for a capability; `model` is a CAPABILITY_MODELS key. */
 	| 'from'
