@@ -21,7 +21,7 @@ Decision models score every option rather than writing text, so there is no outp
 ## What PurpleMIST-Mini-2.0 can do
 
 - **Answer many questions at once.** Up to 64 questions per call, of three types: pick one of several options (`choice`), say how likely a statement is true (`noul`), or place the state on a scale (`score`). They share one pass over the state, so extra questions cost almost nothing.
-- **Read images.** Send receipts, invoices, screenshots or photos, alone or with text. A call can carry up to 4 images, which the model reads in order. It is 0.984 accurate on held-out receipts and 0.907 on screenshots and real photos.
+- **Read images.** Send receipts, invoices, screenshots or photos, alone or with text. A call can carry up to 16 images, which the model reads in order. With one image it is 0.984 accurate on held-out receipts and 0.907 on screenshots and real photos; accuracy is measured on single images.
 - **Work in 19 languages.** English; Amharic, Hausa, Igbo, Nigerian Pidgin, Somali, Swahili, Yorùbá and isiZulu; and Arabic, Chinese, French, German, Hindi, Indonesian, Portuguese, Russian, Spanish and Turkish.
 - **Ask in a different language from the input.** Write your questions once, in English say, and use them on messages in any of the 19 languages (0.937 accuracy on held-out cross-language questions).
 - **Give probabilities you can act on.** Each question type is calibrated separately for text and images, so an answer given 0.9 is right close to 9 times in 10. Set thresholds on them: act automatically when the model is sure, and send the rest to a person.
@@ -93,7 +93,7 @@ result = call("/v1/decide", {
 | --- | --- | --- |
 | `model` | string | Optional. `purplemist-mini-2.0` (the default and only model). The `olaverse/PurpleMIST-Mini-2.0` form works too. |
 | `state` | string, object or array | The thing being decided about. It must not be empty unless you send `images`. |
-| `images` | array of strings | Optional. Up to 4 images as base64 or data URLs (`data:image/png;base64,...`), up to 16 MB each. Links are not fetched. |
+| `images` | array of strings | Optional. Up to 16 images as base64 or data URLs (`data:image/png;base64,...`), up to 16 MB each. Links are not fetched. |
 | `assets` | object | Optional. Images in the System One format, referenced from the state, instructions or criteria. See [System One assets](#system-one-assets). |
 | `questions` | object | 1 to 64 questions, keyed by your own IDs. |
 
@@ -124,7 +124,7 @@ Code written for System One works unchanged on `POST /v1/systemone`. Put a refer
 - `format` is `png`, `jpg` or `jpeg`; `data_base64` is plain base64, without a `data:` prefix.
 - Use unique references such as UUIDs. Every asset must be referenced somewhere, or the request returns `400`.
 - Images can also be sent as multipart: a `request` part holding the JSON, and one part per image, named by the asset's `part` field.
-- The model reads images before the state, in the order they are first referenced; each reference becomes `[image 1]`, `[image 2]` and so on. Up to 4 images per request, counting `images` and `assets` together.
+- The model reads images before the state, in the order they are first referenced; each reference becomes `[image 1]`, `[image 2]` and so on. Up to 16 images per request, counting `images` and `assets` together; each takes up to 1,024 of the 27,000 tokens.
 - The `TypeSafe-Danger-Zone-Images` header is accepted and not needed.
 
 ## Response
