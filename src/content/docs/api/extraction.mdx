@@ -7,7 +7,7 @@ import Price from '../../../components/Price.astro';
 import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
 <div class="ola-endpoint">
-	<code>POST /v1/extract</code><code>POST /v1/extract/batch</code><code><Price model="extract" format="from" /></code>
+	<code>POST /v1/extract</code><code>POST /v1/extract/batch</code><code>POST /v1/extract/jobs</code><code><Price model="extract" format="from" /></code>
 </div>
 
 Send a **template** (the shape of the answer, with a type for each field) and a **document** as text, an image, or both. You get the template filled in, plus a confidence between 0 and 1 for every field.
@@ -63,7 +63,7 @@ r = call("/v1/extract", {
 | Field | Default | Notes |
 | --- | --- | --- |
 | `template` | required | A JSON object (or a JSON string) with the shape of the answer, up to 8,000 characters. |
-| `text` | | The document as text, up to 60,000 characters. Give `text`, `image` or both. |
+| `text` | | The document as text, up to 60,000 characters (longer: use a [job](#long-documents)). Give `text`, `image` or both. |
 | `image` | | One JPEG or PNG as base64 or a data URL, up to 10 MB. Large photos are scaled down automatically. |
 | `instructions` | | Optional guidance, such as "Dates are day/month/year" or "amounts in kobo". |
 | `model` | `mist-extract-1.0` | `mist-extract-1.0`, the only extraction model on the API. `mist-extract-flash-1.0` is still accepted and runs `mist-extract-1.0`. |
@@ -114,6 +114,44 @@ Each document succeeds or fails on its own. An invalid document comes back with 
  "usage": {"input_tokens": 230, "output_tokens": 41, "documents": 1}}
 ```
 
+## Long documents
+
+For contracts, filings, statements and reports over 60,000 characters, create a **job**: `POST /v1/extract/jobs` takes the whole document, up to 3,000,000 characters of `text` or 200 page images in `pages`. It splits the document into parts at paragraph boundaries (or one part per page image), extracts every part in parallel with the same template, and merges the answers. Lists are joined in document order, and for single values the most confident part wins.
+
+Creating the job is free and returns `202` at once. Poll it until `status` is no longer `running`:
+
+```python
+import os, time, requests
+
+BASE = "https://api.olaverselab.com"
+HEADERS = {"Authorization": f"Bearer {os.environ['OLAVERSE_KEY']}"}
+
+job = requests.post(f"{BASE}/v1/extract/jobs", headers=HEADERS, json={
+    "template": {"issuer": "verbatim-string", "holdings": [{"name": "verbatim-string", "value": "number"}]},
+    "text": open("filing.txt").read(),
+    "instructions": "holdings come from the information table, not the cover page"}).json()
+# {"id": "exj_...", "status": "running", "parts": 8, "poll": "/v1/extract/jobs/exj_..."}
+
+while (r := requests.get(f"{BASE}{job['poll']}", headers=HEADERS).json())["status"] == "running":
+    time.sleep(5)          # r["parts_done"] shows progress
+print(r["data"], r["usage"])
+```
+
+```json
+{"id": "exj_6d1c...", "model": "mist-extract-1.0", "status": "completed", "parts": 8, "parts_done": 8,
+ "data": {...}, "confidence": {...}, "failed_parts": [],
+ "usage": {"input_tokens": 61204, "output_tokens": 3311, "documents": 1, "parts": 8}}
+```
+
+- **Billing.** You pay for the tokens of the parts that were extracted, once, the first time you read the completed result. Creating the job, polling it and reading it again are free, and a failed job isn't billed.
+- **Parts that fail** are listed in `failed_parts` and not billed. The job fails only if no part could be extracted.
+- **Privacy.** A job can only be read with an API key on the account that created it. Results are deleted 7 days after the job finishes, and the document itself is never stored.
+- **Fields that span parts.** Each part sees only its own text, so ask for a value that needs the whole document (a grand total, say) from the page that states it.
+
+<Aside>
+**Long answers in one call.** On `POST /v1/extract`, the document and the answer share the model's 32,768-token context, so the answer can use whatever the document leaves. If they don't fit together, you get `413` and the call isn't billed. Use a job, or ask for fewer fields at once.
+</Aside>
+
 ## Pricing
 
 Extraction is charged per token, like the rest of the token-priced models: <Price model="mist-extract-1.0" />.
@@ -126,4 +164,4 @@ Extraction is charged per token, like the rest of the token-priced models: <Pric
 
 ## Speed
 
-About 1 second per document. Long documents and large batches take longer, so give your HTTP client a timeout of about 2 minutes.
+About 1 second per document. Long documents and large batches take longer, so give your HTTP client a timeout of about 2 minutes. A job takes about 10 to 60 seconds for a 50 to 100 page document.
