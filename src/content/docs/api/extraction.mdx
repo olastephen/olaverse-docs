@@ -91,6 +91,18 @@ A missing value comes back as `null`, and an empty list as `[]`.
 
 Confidence is **calibrated**: when a field says 0.66, it is right about 66% of the time. A common pattern is to accept fields at 0.95 or above automatically and send the rest to a person to check. An empty list has no confidence.
 
+How well that holds depends on how close your documents are to the ones the model was calibrated on: English and African-language everyday documents (receipts, mobile-money and bank messages, bills, letters and forms). Before you automate on a threshold, **check it on a sample of your own documents**: extract 100 to 200 you have the right answers for, and look at how often fields at or above your threshold are actually right. If they're right less often than the threshold says, raise it.
+
+### Calibrated on your documents (enterprise)
+
+For production volumes, we can calibrate the confidence on **your** documents, so that 0.95 means right 95% of the time on the documents you actually send, in whatever language or format they are.
+
+1. You send 50 to 2,000 of your documents with the right answers, in the template you'll use.
+2. We extract them, fit a calibration on half the fields and measure it on the other half. You get the before-and-after report (calibration error and how often fields in each confidence band were right) before anything changes.
+3. Once you approve it, every extraction on your account (single calls, batches and jobs) uses it, and the response includes `"calibration": "custom"` so you can tell.
+
+Calibration makes the confidence trustworthy on your documents. It doesn't change the extracted values themselves; for that, ask about fine-tuning on your data. [Get in touch](https://www.olaverselab.com/contact) to set it up.
+
 <Aside type="note">
 When the model's answer isn't valid JSON (rare), you get status `200` with `"data": null`, an error and the model's raw text, and the call is not billed.
 </Aside>
