@@ -25,8 +25,8 @@ languages.
 
 | Task | Endpoint | Batch (limit) | Models (default first) |
 | --- | --- | --- | --- |
-| Decide: classify, route, flag, score | `POST /v1/decide` | `/v1/decide/batch` (32 cases) | `purplemist-flash-1.0` |
-| Document to JSON, with per-field confidence | `POST /v1/extract` | `/v1/extract/batch` (16 documents) | `mist-extract-1.0`, `mist-extract-flash-1.0` |
+| Decide: classify, route, flag, score | `POST /v1/decide` | `/v1/decide/batch` (32 cases) | `purplemist-mini-2.0` |
+| Document to JSON, with per-field confidence | `POST /v1/extract` | `/v1/extract/batch` (16 documents) | `mist-extract-1.0` |
 | Language of a text (608 languages) | `POST /v1/language-id` | `/v1/language-id/batch` (256 texts) | `lid-neural-608`, `lid-lite-608` |
 | Restore diacritics and tone marks (11 languages) | `POST /v1/diacritize` | `/v1/diacritize/batch` (64 texts) | `diacnet-2.0`, `diacnet-mini-2.0`, `diactag-2.0` |
 | Search-style questions from a passage (25 languages) | `POST /v1/questions/generate` | `/v1/questions/generate/batch` (64 passages) | `mist-qg-1.5b` |
@@ -38,7 +38,7 @@ clients `POST /v1/systemone` (decisions), with base URL `https://api.olaverselab
 
 ```json
 {
-  "model": "purplemist-flash-1.0",
+  "model": "purplemist-mini-2.0",
   "state": "I was charged twice, please refund me",
   "questions": {
     "refund":  {"type": "noul", "instructions": "The customer asks for money back."},
