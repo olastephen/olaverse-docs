@@ -116,6 +116,10 @@ Each document succeeds or fails on its own. An invalid document comes back with 
 
 ## Long documents
 
+<Aside type="caution" title="Beta">
+Jobs work best on long documents with a moderate number of fields or table rows (up to a few hundred): contracts, statements, multi-page invoices and forms. Very large tables, such as filings with thousands of rows, may come back incomplete.
+</Aside>
+
 For contracts, filings, statements and reports over 60,000 characters, create a **job**: `POST /v1/extract/jobs` takes the whole document, up to 3,000,000 characters of `text` or 200 page images in `pages`. It splits the document into parts at paragraph boundaries (or one part per page image), extracts every part in parallel with the same template, and merges the answers. Lists are joined in document order, and for single values the most confident part wins.
 
 Creating the job is free and returns `202` at once. Poll it until `status` is no longer `running`:
