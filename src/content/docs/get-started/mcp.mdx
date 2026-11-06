@@ -18,9 +18,24 @@ The Olaverse MCP server gives AI agents the API as tools. Ask your agent to "pul
 
 ## Install
 
-You need an API key from the [developer console](https://console.olaverselab.com) and [uv](https://docs.astral.sh/uv/getting-started/installation/), which runs the server (`uvx` downloads it the first time).
+You need an API key from the [developer console](https://console.olaverselab.com). Connect to the **hosted** server (nothing to install), or run it **locally** with [uv](https://docs.astral.sh/uv/getting-started/installation/) (`uvx` downloads it the first time; the local server can also read files on your machine).
 
 <Tabs>
+<TabItem label="Hosted (any client)">
+Point any client that supports remote MCP servers (Claude, ChatGPT and Cursor connectors, Arcade, Smithery and others) at:
+
+```text
+https://mcp.olaverselab.com/mcp
+```
+
+and send your key as a header:
+
+```text
+Authorization: Bearer your-key
+```
+
+The hosted server takes documents as `text`, or as an `image` or `pdf` in base64. It doesn't read files or fetch URLs.
+</TabItem>
 <TabItem label="Claude Code">
 ```bash
 claude mcp add olaverse --env OLAVERSE_API_KEY=your-key -- uvx olaverse-mcp
@@ -43,7 +58,7 @@ Add this to the `mcpServers` section of the client's MCP configuration file:
 </TabItem>
 </Tabs>
 
-Restart the client, and the six tools appear.
+Restart (or reconnect) the client, and the six tools appear.
 
 ## Use it
 
