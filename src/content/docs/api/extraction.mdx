@@ -159,6 +159,10 @@ print(r["data"], r["usage"])
  "usage": {"input_tokens": 61204, "output_tokens": 3311, "documents": 1, "parts": 8}}
 ```
 
+- **Estimate.** The `202` reply includes `"estimate": {"cost_usd": ..., "seconds": ...}`, a cautious estimate of the job's cost and time. If your credit can't cover the estimate, you get `402` and nothing runs; add credit or send fewer pages.
+- **Size.** A job can take up to 300 parts (roughly a few hundred pages). Bigger documents get `413`: send them in sections.
+- **Durable.** A job survives restarts on our side: finished parts are saved as it goes, and an interrupted job resumes on its own.
+- **Fair share.** Each account runs a limited number of parts at once, so very large jobs take longer, and other calls stay fast.
 - **Billing.** You pay for the tokens of the parts that were extracted, once, the first time you read the completed result. Creating the job, polling it and reading it again are free, and a failed job isn't billed.
 - **Parts that fail** are listed in `failed_parts` and not billed. The job fails only if no part could be extracted.
 - **Privacy.** A job can only be read with an API key on the account that created it. Results are deleted 7 days after the job finishes, and the document itself is never stored.
