@@ -1,0 +1,72 @@
+---
+title: Use with AI agents (MCP)
+description: Give Claude, Cursor and other AI agents Olaverse's document extraction, decisions, language ID and diacritics as tools, with the Olaverse MCP server.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+The Olaverse MCP server gives AI agents the API as tools. Ask your agent to "pull the total and date out of this receipt" or "which language is this message in?", and it calls Olaverse directly. It works with any client that supports the [Model Context Protocol](https://modelcontextprotocol.io): Claude Desktop, Claude Code, Cursor, Windsurf and others.
+
+| Tool | What it does |
+|---|---|
+| `extract_document` | A document (text, a JPEG/PNG photo or scan, or a PDF) to JSON shaped like a template, with a calibrated confidence for every field. Long documents run as a [job](/api/extraction/#long-documents). |
+| `get_extraction_job` | Collects a long-document result that's still running. |
+| `decide` | Typed questions about a message, ticket or record, with calibrated probabilities. |
+| `detect_language` | The language of a text, among 608. |
+| `restore_diacritics` | Tone marks, accents and Arabic vowel marks back in 11 languages. |
+| `generate_questions` | Search-style questions a passage answers, in its own language. |
+
+## Install
+
+You need an API key from the [developer console](https://console.olaverselab.com) and [uv](https://docs.astral.sh/uv/getting-started/installation/), which runs the server (`uvx` downloads it the first time).
+
+<Tabs>
+<TabItem label="Claude Code">
+```bash
+claude mcp add olaverse --env OLAVERSE_API_KEY=your-key -- uvx olaverse-mcp
+```
+</TabItem>
+<TabItem label="Claude Desktop, Cursor and others">
+Add this to the `mcpServers` section of the client's MCP configuration file:
+
+```json
+{
+  "mcpServers": {
+    "olaverse": {
+      "command": "uvx",
+      "args": ["olaverse-mcp"],
+      "env": { "OLAVERSE_API_KEY": "your-key" }
+    }
+  }
+}
+```
+</TabItem>
+</Tabs>
+
+Restart the client, and the six tools appear.
+
+## Use it
+
+Ask in plain words:
+
+- "Extract the merchant, date, total and line items from ~/Downloads/receipt.jpg."
+- "Read these MoMo messages and give me the amount, recipient and reference of each."
+- "Is this customer asking for a refund, and how urgent is it?"
+- "Which language is 'Ina kwana'? Then add the tone marks back to 'se eranko naa si gbo o'."
+
+Every call is billed to your key at the usual [prices](/reference/models/), exactly like a direct API call.
+
+<Aside>
+**Check the confidence.** `extract_document` returns a confidence for every field. Fields at 0.95 and above are usually right, but [check a threshold on your own documents](/api/extraction/#using-the-confidence) before an agent acts on extracted values without a person looking.
+</Aside>
+
+## Settings
+
+| Variable | Default | |
+|---|---|---|
+| `OLAVERSE_API_KEY` | required | Your API key. |
+| `OLAVERSE_JOB_WAIT` | `900` | Seconds a long-document extraction waits before handing back a job id for `get_extraction_job`. |
+
+Scanned PDFs without a text layer aren't read directly: send their pages as JPEG or PNG images.
+
+The server is open source (Apache-2.0): [github.com/Olaverse-Labs/olaverse-mcp](https://github.com/Olaverse-Labs/olaverse-mcp).

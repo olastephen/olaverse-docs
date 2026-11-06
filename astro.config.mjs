@@ -29,6 +29,7 @@ export default defineConfig({
 						{ label: 'Introduction', link: '/' },
 						{ label: 'Quickstart', slug: 'get-started/quickstart' },
 						{ label: 'Agent skill', slug: 'get-started/agent-skill' },
+						{ label: 'AI agents (MCP)', slug: 'get-started/mcp' },
 						{ label: 'Example use cases', slug: 'get-started/use-cases' },
 					],
 				},
