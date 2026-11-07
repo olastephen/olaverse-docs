@@ -97,7 +97,7 @@ clients `POST /v1/systemone` (decisions), with base URL `https://api.olaverselab
   extraction items an `id`. Each item succeeds or fails on its own and only successes are billed; retry only the failed
   items.
 - Every billable response has a `usage` block. Prices: `GET /v1/models`.
-- Rate limit: 120 requests per minute per account (all its keys), a rolling one-minute window, shown in
+- Rate limit: 600 requests per minute per account (all its keys), a rolling one-minute window, shown in
   `RateLimit-Limit` and `RateLimit-Remaining`. A batch call counts as one request, so batch bulk work.
 
 ## Errors and retries

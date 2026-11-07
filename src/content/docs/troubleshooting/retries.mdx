@@ -24,18 +24,20 @@ In a batch, each item succeeds or fails on its own. Retry only the items that ca
 
 ## Rate limits
 
-Each account can make **120 requests per minute**. The minute is a rolling window: it counts your requests over the last 60 seconds, so capacity comes back as older requests age out. All of an account's API keys share the one limit. Need more? [Talk to us](https://www.olaverselab.com/contact) about a higher limit.
+Each account can make **600 requests per minute**. The minute is a rolling window: it counts your requests over the last 60 seconds, so capacity comes back as older requests age out. All of an account's API keys share the one limit. Need more? [Talk to us](https://www.olaverselab.com/contact) about a higher limit.
 
 `GET /v1/models` and `GET /health` allow 3,000 requests per minute, and other calls without a key 300 per minute per IP address.
 
 Every response carries your limit and how much of it is left:
 
 ```http
-RateLimit-Limit: 120
-RateLimit-Remaining: 97
+RateLimit-Limit: 600
+RateLimit-Remaining: 577
 ```
 
 When `RateLimit-Remaining` reaches 0, calls return `429`. The `Retry-After` header on it says 900 seconds, but since the window is one minute you can retry after about 60 seconds. A [batch call](/api/overview/#batches) counts as one request however many inputs it carries, so batching is the easiest way to do more inside the limit.
+
+Repeated failed sign-ins from one IP address (more than 32 calls with a missing or wrong key in two minutes) block that address for 5 minutes with a `403`. Other errors, including `429`, don't count towards it, so check your key is right before retrying a `401` in a loop.
 
 ## Retrying with SmartRateLimit
 
