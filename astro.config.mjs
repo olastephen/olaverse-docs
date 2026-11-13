@@ -14,6 +14,16 @@ export default defineConfig({
 			logo: { src: './src/assets/logo.png', alt: 'Olaverse Lab' },
 			favicon: '/favicon.ico',
 			customCss: ['./src/styles/olaverse.css'],
+			// Dark by default, like the website and console: on a first visit, before Starlight
+			// reads the saved theme, store "dark". A later choice in the theme picker (Light,
+			// Auto) is kept, because this only runs once per browser.
+			head: [
+				{
+					tag: 'script',
+					content:
+						"try{if(!localStorage.getItem('ola-theme-init')){localStorage.setItem('ola-theme-init','1');if(!localStorage.getItem('starlight-theme'))localStorage.setItem('starlight-theme','dark')}}catch(e){}",
+				},
+			],
 			components: {
 				SiteTitle: './src/components/SiteTitle.astro',
 				Sidebar: './src/components/Sidebar.astro',
