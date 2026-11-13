@@ -31,6 +31,7 @@ export default defineConfig({
 						{ label: 'Agent skill', slug: 'get-started/agent-skill' },
 						{ label: 'AI agents (MCP)', slug: 'get-started/mcp' },
 						{ label: 'Example use cases', slug: 'get-started/use-cases' },
+						{ label: 'Buy through Azure Marketplace', slug: 'get-started/azure-marketplace' },
 					],
 				},
 				{

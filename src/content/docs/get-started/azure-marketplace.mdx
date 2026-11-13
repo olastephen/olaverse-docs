@@ -1,0 +1,29 @@
+---
+title: Buy through Azure Marketplace
+description: Subscribe to the Olaverse API on Microsoft Azure Marketplace and pay for it on your Azure invoice.
+---
+
+The Olaverse API is on [Microsoft Azure Marketplace](https://marketplace.microsoft.com/en-us/product/olaverselab.olaverse-api?tab=Overview). Buying it there gives you the same API, models and prices, billed on your Azure invoice instead of by card.
+
+## Subscribe
+
+1. Open the [Olaverse API listing](https://marketplace.microsoft.com/en-us/product/olaverselab.olaverse-api?tab=Overview) and select **Get it now**, or find **Olaverse API** in the Azure portal under **Marketplace**.
+2. Choose the **Pay as you go** plan, an Azure subscription and a resource group, then subscribe.
+3. When the subscription is ready, select **Configure account now**. Azure sends you to the Olaverse console.
+4. Sign in to the console, or create an account, and confirm the link. One Azure subscription links to one Olaverse account.
+5. Create an API key under **Keys** and follow the [quickstart](/get-started/quickstart/).
+
+## How billing works
+
+- There is no monthly fee. Each call is priced exactly as on the [billing page](/reference/billing/).
+- Usage is reported to Azure every hour as **API credits** of $0.01 each. Amounts below one credit carry over to the next hour.
+- Charges appear in **Cost Management** for the Azure subscription you chose, in your billing currency, usually within a day.
+- A linked account doesn't need top-ups: its calls are billed through Azure, so it won't run out of Olaverse credit.
+
+## Cancel or pause
+
+Cancel the subscription in the Azure portal (**SaaS** → your Olaverse API resource → **Cancel subscription**). From then on usage is no longer billed through Azure, and the account's keys return `402` until you [add credit](/reference/billing/#adding-credit) to it directly. If Azure suspends the subscription, for example over an unpaid invoice, calls return `402` until it's reinstated.
+
+## Questions
+
+Email [support@olaverselab.com](mailto:support@olaverselab.com) with your Azure subscription ID if a purchase doesn't link or a charge looks wrong.
