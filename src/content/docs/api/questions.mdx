@@ -43,6 +43,7 @@ print(r["questions"])
 - **A number, across languages:** you get exactly that many, from 1 to 5.
 - **A number, in the passage's own language:** it's a maximum. A short passage that only supports two good questions gives two, not five padded ones, and `warnings` says so.
 - **`"auto"`:** the model decides from the passage. Use it when every question must be one the text really answers, such as training pairs.
+- **Repeats are removed.** If the model writes the same question twice, or two near-identical versions of it, you get it once, `warnings` says so, and you aren't charged for the removed ones.
 
 ## Cross-lingual questions
 
