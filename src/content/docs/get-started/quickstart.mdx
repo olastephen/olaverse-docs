@@ -129,7 +129,7 @@ See [Document extraction](/api/extraction/).
 | A document as JSON, with a confidence per field | `POST /v1/extract` | <Price model="extract" format="from" /> |
 | The language of a text (608 languages) | `POST /v1/language-id` | <Price model="language-id" format="from" /> |
 | Diacritics and tone marks restored (11 languages) | `POST /v1/diacritize` | <Price model="diacritize" format="from" /> |
-| Search-style questions from a passage (25 languages) | `POST /v1/questions/generate` | <Price model="questions" format="from" /> |
+| Questions a passage answers (324 languages, cross-lingual) | `POST /v1/questions/generate` | <Price model="questions" format="from" /> |
 | What's available | `GET /v1/models` | free |
 
 Each POST endpoint also has a `/batch` version. Prices depend on the model; see [Pricing](/reference/billing/).

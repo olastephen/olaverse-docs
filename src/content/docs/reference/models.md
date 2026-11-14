@@ -46,7 +46,7 @@ All Olaverse models are open-weight and published on [Hugging Face](https://hugg
 
 | Model | Size | Notes |
 | --- | --- | --- |
-| [`mist-qg-1.5b`](https://huggingface.co/olaverse/mist-qg-1.5b) | 1.5B | 25 languages; questions always in the passage's own language. |
+| [`mist-qg-1.1`](https://huggingface.co/olaverse/MIST-QG-1.1) | 4B | Passages in 324 languages; questions in the passage's own language, English, French, or 30 widely spoken languages. `n` from 1 to 5, or `"auto"`. Replaces `mist-qg-1.5b`. |
 
 ## Utility endpoints
 

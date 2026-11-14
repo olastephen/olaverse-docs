@@ -19,7 +19,7 @@ export type PriceTable = Record<string, Price>;
 export const DEFAULT_PRICES: PriceTable = {
 	'purplemist-mini-2.0': { unit: 'tokens', input: 0.02, output: null },
 	'mist-extract-1.0': { unit: 'tokens', input: 0.8, output: 4 },
-	'mist-qg-1.5b': { unit: 'tokens', input: 0.04, output: 0.12 },
+	'mist-qg-1.1': { unit: 'tokens', input: 0.1, output: 0.4 },
 	'lid-neural-608': { unit: 'requests', price: 0.3, per: 1_000 },
 	'lid-lite-608': { unit: 'requests', price: 0.05, per: 1_000 },
 	'diacnet-2.0': { unit: 'characters', price: 1.0, per: 1_000_000 },
@@ -33,7 +33,7 @@ export const CAPABILITY_MODELS: Record<string, string[]> = {
 	extract: ['mist-extract-1.0'],
 	'language-id': ['lid-neural-608', 'lid-lite-608'],
 	diacritize: ['diacnet-2.0', 'diacnet-mini-2.0', 'diactag-2.0'],
-	questions: ['mist-qg-1.5b'],
+	questions: ['mist-qg-1.1'],
 };
 
 /* ── The gateway's shape ─────────────────────────────────────────────────────── */

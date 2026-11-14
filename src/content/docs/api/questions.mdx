@@ -1,6 +1,6 @@
 ---
 title: Question generation
-description: Bulk search queries from your passages, for training and testing search and RAG systems, in 17 languages, with 8 more in free beta.
+description: The questions a passage answers, in 324 languages, in its own language or across languages, for training and testing search and RAG systems.
 ---
 
 import Price from '../../../components/Price.astro';
@@ -10,9 +10,7 @@ import { Aside } from '@astrojs/starlight/components';
 	<code>POST /v1/questions/generate</code><code>POST /v1/questions/generate/batch</code><code><Price model="questions" format="from" /></code>
 </div>
 
-Turns a passage into `n` search-style questions that it answers: the queries a user would type to find it. Built for **training and testing search and RAG systems in bulk**: run your corpus through it to get `(query, passage)` pairs for fine-tuning retrievers and rerankers, or a test set that checks your search finds the right passage. It also works for FAQs and study cards. Powered by [mist-qg-1.5b](https://huggingface.co/olaverse/mist-qg-1.5b).
-
-The questions are always in the **passage's own language**: a Yorùbá passage gives Yorùbá questions. The language is detected for you; the model does not translate.
+Turns a passage into the questions it answers, in your own words rather than copied from the text. Built for **training and testing search and RAG systems in bulk**: run your corpus through it to get `(question, passage)` pairs for fine-tuning embedders and rerankers, or a test set that checks your search finds the right passage. It also works for FAQs and study cards. Powered by [MIST-QG-1.1](https://huggingface.co/olaverse/MIST-QG-1.1), trained on passages in 324 languages.
 
 ```python
 r = call("/v1/questions/generate", {
@@ -25,33 +23,47 @@ print(r["questions"])
 
 | Field | Default | Notes |
 | --- | --- | --- |
-| `passage` | required | 1 to 8,000 characters. Works best at paragraph length. |
-| `n` | `3` | 1 to 10 questions. |
-| `language` | detected | Optional. The passage's language, as a name or code: `yor`, `yo` or `Yoruba`. One of the [25 supported languages](#supported-languages). If the passage is clearly in a different supported language, that one is used and `warnings` says so. |
+| `passage` | required | 1 to 8,000 characters. Works best at paragraph length, up to about 2,000 characters; split longer documents into passages. |
+| `n` | `3` | How many questions: 1 to 5, or `"auto"` to let the model write as many as the passage supports (usually about two). Values up to 10 are accepted and capped at 5. |
+| `language` | detected | Optional. The passage's language, as a name or code: `yor`, `yo` or `Yoruba`. Detected for you when left out. |
+| `question_language` | the passage's | Optional. Write the questions in another language: see [Cross-lingual questions](#cross-lingual-questions). |
 
 ## Response
 
 ```json
-{"questions": ["What causes ocean tides?", "...", "..."], "language": "eng",
- "model": "olaverse/mist-qg-1.5b", "warnings": [],
+{"questions": ["What causes ocean tides?", "...", "..."], "language": "eng", "question_language": "eng",
+ "model": "mist-qg-1.1", "warnings": [],
  "usage": {"input_tokens": 96, "output_tokens": 27, "generations": 1}}
 ```
 
-`language` is the language the questions are in. `warnings` flags a very short passage, a language the model is less confident in, a passage whose language couldn't be told (the questions are then in English), or a `language` that didn't match the passage.
+`language` is the passage's language and `question_language` the questions'. `warnings` flags a very short or very long passage, a passage whose language couldn't be told, a count above 5, or a passage that supports fewer distinct questions than you asked for.
 
+## How many questions
 
-## Supported languages
+- **A number, across languages:** you get exactly that many, from 1 to 5.
+- **A number, in the passage's own language:** it's a maximum. A short passage that only supports two good questions gives two, not five padded ones, and `warnings` says so.
+- **`"auto"`:** the model decides from the passage. Use it when every question must be one the text really answers, such as training pairs.
 
-**Ready (16 languages):** Afrikaans, Dutch, English, French, German, Hindi, Indonesian, Italian, Japanese, Korean, Polish, Portuguese, Russian, Spanish, Turkish, Vietnamese and Xhosa.
+## Cross-lingual questions
 
-**Beta, free (7 languages):** Amharic, Hausa, Igbo, Shona, Somali, Swahili, Yorùbá and Zulu. In these languages the model often restates a sentence of the passage instead of asking about it, so for now they're free, with safeguards:
+Set `question_language` to get questions in a different language from the passage:
 
-- Restated sentences are dropped before you get the response, so you may get fewer than `n` questions; `warnings` says how many were dropped.
-- At most **3 questions** per passage.
-- Every response carries a `warnings` entry saying the language is in beta.
+- **Any passage → English or French.** A Yorùbá, Quechua or Hausa passage can give English or French questions.
+- **English or French passage → 30 widely spoken languages:** Afrikaans, Amharic, Arabic, Bengali, Chinese, Dutch, German, Hausa, Hindi, Igbo, Indonesian, Italian, Japanese, Korean, Persian, Polish, Portuguese, Russian, Somali, Spanish, Swahili, Tamil, Telugu, Thai, Turkish, Ukrainian, Urdu, Vietnamese, Yoruba and Zulu.
+- **Between any two of those 30**, such as Swahili → Hindi.
 
-We're retraining the model for these languages and will take them out of beta when the questions are good enough to charge for.
+Other directions return `400` with the reason.
+
+```python
+r = call("/v1/questions/generate", {
+    "passage": "Ọjà Ọ̀jọ̀ jẹ́ ọjà ìbílẹ̀ tó gbajúmọ̀ ní ìlú Ìbàdàn...",
+    "question_language": "English", "n": 2})
+```
 
 ## Batch
 
-`POST /v1/questions/generate/batch` with `"passages": [...]` (up to **64**, in any mix of supported languages) returns `{"results": [[...], [...]], "languages": [...]}`, with each passage's language in `languages`.
+`POST /v1/questions/generate/batch` with `"passages": [...]` (up to **64**, in any mix of languages, with the same `n`, `language` and `question_language` fields) returns `{"results": [[...], [...]], "languages": [...], "question_languages": [...]}`.
+
+<Aside type="note">
+`mist-qg-1.5b` was the previous model on this endpoint. Requests that name it are answered by MIST-QG-1.1.
+</Aside>

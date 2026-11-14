@@ -9,7 +9,7 @@ Olaverse speaks the two formats most AI clients already use, so you can switch b
 
 | Format | Endpoint | Models | Works with |
 | --- | --- | --- | --- |
-| OpenAI chat completions | `POST /v1/chat/completions` | `mist-qg-1.5b`, `mist-extract-1.0` | OpenAI SDKs, OpenRouter-style clients, anything that takes an OpenAI base URL |
+| OpenAI chat completions | `POST /v1/chat/completions` | `mist-qg-1.1`, `mist-extract-1.0` | OpenAI SDKs, OpenRouter-style clients, anything that takes an OpenAI base URL |
 | System One decisions | `POST /v1/systemone` | `purplemist-mini-2.0` | TypeSafe SDK, OpenRouter's System One API, Ollama, LiteLLM |
 
 Model ids can be given as `olaverse/<name>` too, in any case: `olaverse/MIST-Extract-1.0` and `mist-extract-1.0` are the same model.
@@ -30,10 +30,10 @@ from openai import OpenAI
 client = OpenAI(api_key=os.environ["OLAVERSE_KEY"], base_url="https://api.olaverselab.com/v1")
 
 r = client.chat.completions.create(
-    model="mist-qg-1.5b",
+    model="mist-qg-1.1",
     messages=[{"role": "user", "content": "The Nile is the longest river in Africa. It flows north through "
                                           "eleven countries before emptying into the Mediterranean Sea."}],
-    extra_body={"n": 3},   # optional: number of questions (1-10, default 3) and "language"
+    extra_body={"n": 3},   # optional: 1-5 or "auto", plus "language" and "question_language"
 )
 questions = json.loads(r.choices[0].message.content)["questions"]
 ```
@@ -42,16 +42,16 @@ questions = json.loads(r.choices[0].message.content)["questions"]
 ```bash
 curl "$OLAVERSE_URL/v1/chat/completions" \
   -H "Authorization: Bearer $OLAVERSE_KEY" -H "Content-Type: application/json" \
-  -d '{"model": "mist-qg-1.5b", "n": 2,
+  -d '{"model": "mist-qg-1.1", "n": 2,
        "messages": [{"role": "user", "content": "Water boils at 100 degrees Celsius at sea level."}]}'
 ```
 </TabItem>
 </Tabs>
 
-- **`n`** (1 to 10, default 3) and **`language`** are optional extra fields. Without `language`, the passage's language is detected, and the response's top-level `language` field says which was used. If it can't be told with confidence, questions are in English and `warnings` says so.
-- The trained form `Write 3 questions that the passage directly answers, in English. ... Passage: <text>` works too; the count and the passage are read from it.
-- The model's output is constrained to the `{"questions": [...]}` schema, so it is always valid JSON with exactly `n` questions.
-- If you send **your own system message**, the request goes to the model as written, with no schema, for custom prompting.
+- **`n`** (1 to 5, or `"auto"` to let the model decide; default 3), **`language`** and **`question_language`** are optional extra fields, as on [`/v1/questions/generate`](/api/questions/). Without `language`, the passage's language is detected; the response's top-level `language` and `question_language` fields say which were used.
+- A form like `Write 3 questions ... Passage: <text>` works too; the count and the passage are read from it.
+- The answer is always valid JSON: `{"questions": [...]}`. Across languages you get exactly `n`; in the passage's own language `n` is a maximum.
+- System messages are ignored: the model takes no instructions besides the passage, the count and the languages.
 
 ### Document extraction
 

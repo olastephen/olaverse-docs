@@ -73,7 +73,7 @@ What `/v1/questions/generate` returns for the first paragraph. Values are illust
 ```json
 {
   "questions": ["How do I reset my wallet PIN?", "Where do I find Reset PIN in the app?", "How long is the SMS code valid?"],
-  "language": "eng", "model": "olaverse/mist-qg-1.5b", "warnings": [],
+  "language": "eng", "model": "mist-qg-1.1", "warnings": [],
   "usage": {"input_tokens": 142, "output_tokens": 31, "generations": 1}
 }
 ```
@@ -92,11 +92,11 @@ The same questions make search training data: each (question, passage) pair is a
 
 ## Adapt it
 
-- **Fewer calls:** `POST /v1/questions/generate/batch` takes up to 64 passages in one language per call (`{"passages": [...], "n": 3, "language": "yor"}`).
+- **Fewer calls:** `POST /v1/questions/generate/batch` takes up to 64 passages per call (`{"passages": [...], "n": 3, "language": "yor"}`).
 - **More or fewer questions:** `per_passage`, from 1 to 10.
 - **OpenAI SDK:** the same model answers on `/v1/chat/completions`; see [OpenAI & OpenRouter clients](/get-started/compatibility/).
 
 <CardGrid>
-	<LinkCard title="Question generation" description="Fields, limits and the 25 languages." href="/api/questions/" />
+	<LinkCard title="Question generation" description="Fields, limits, and cross-lingual questions in 324 languages." href="/api/questions/" />
 	<LinkCard title="Retrieval training data use case" description="Fine-tune a retriever on your own corpus." href="https://www.olaverselab.com/use-cases/retrieval-training-data" />
 </CardGrid>
