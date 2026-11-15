@@ -50,7 +50,7 @@ curl "$OLAVERSE_URL/v1/chat/completions" \
 
 - **`n`** (1 to 5, or `"auto"` to let the model decide; default 3), **`language`** and **`question_language`** are optional extra fields, as on [`/v1/questions/generate`](/api/questions/). Without `language`, the passage's language is detected; the response's top-level `language` and `question_language` fields say which were used.
 - A form like `Write 3 questions ... Passage: <text>` works too; the count and the passage are read from it.
-- The answer is always valid JSON: `{"questions": [...]}`. Across languages you get exactly `n`; in the passage's own language `n` is a maximum.
+- The answer is always valid JSON: `{"questions": [...]}`. `n` is a maximum: a passage that supports fewer questions gives fewer.
 - System messages are ignored: the model takes no instructions besides the passage, the count and the languages.
 
 ### Document extraction
