@@ -63,7 +63,7 @@ r = call("/v1/extract", {
 | Field | Default | Notes |
 | --- | --- | --- |
 | `template` | required | A JSON object (or a JSON string) with the shape of the answer, up to 24,000 characters. |
-| `text` | | The document as text, up to 60,000 characters (longer: use a [job](#long-documents)). Give `text`, `image` or both. |
+| `text` | | The document as text, up to 120,000 characters (longer: use a [job](#long-documents)). Give `text`, `image` or both. |
 | `image` | | One JPEG or PNG as base64 or a data URL, up to 10 MB. Large photos are scaled down automatically. |
 | `instructions` | | Optional guidance, such as "Dates are day/month/year" or "amounts in kobo". |
 | `model` | `mist-extract-1.0` | `mist-extract-1.0`, the only extraction model on the API. `mist-extract-flash-1.0` is still accepted and runs `mist-extract-1.0`. |
@@ -132,7 +132,7 @@ Each document succeeds or fails on its own. An invalid document comes back with 
 Jobs work best on long documents with a moderate number of fields or table rows (up to a few hundred): contracts, statements, multi-page invoices and forms. Very large tables, such as filings with thousands of rows, may come back incomplete.
 </Aside>
 
-For contracts, filings, statements and reports over 60,000 characters, create a **job**: `POST /v1/extract/jobs` takes the whole document, up to 3,000,000 characters of `text` or 200 page images in `pages`. It splits the document into parts at page breaks (form feeds, `\f`, if your text has them) or paragraph boundaries (or one part per page image), extracts every part in parallel with the same template, and merges the answers. Lists are joined in document order (a row repeated on every page, such as a heading list, is kept once), and for single values the most confident part wins.
+For contracts, filings, statements and reports over 120,000 characters, create a **job**: `POST /v1/extract/jobs` takes the whole document, up to 3,000,000 characters of `text` or 200 page images in `pages`. It splits the document into parts at page breaks (form feeds, `\f`, if your text has them) or paragraph boundaries (or one part per page image), extracts every part in parallel with the same template, and merges the answers. Lists are joined in document order (a row repeated on every page, such as a heading list, is kept once), and for single values the most confident part wins.
 
 Creating the job is free and returns `202` at once. Poll it until `status` is no longer `running`:
 
@@ -169,7 +169,7 @@ print(r["data"], r["usage"])
 - **Fields that span parts.** Each part sees only its own text, so ask for a value that needs the whole document (a grand total, say) from the page that states it.
 
 <Aside>
-**Long answers in one call.** On `POST /v1/extract`, the document and the answer share the model's 32,768-token context, so the answer can use whatever the document leaves. If they don't fit together, you get `413` and the call isn't billed. Use a job, or ask for fewer fields at once.
+**Long answers in one call.** On `POST /v1/extract`, the document and the answer share the model's 131,072-token context, so the answer can use whatever the document leaves. If they don't fit together, you get `413` and the call isn't billed. Use a job, or ask for fewer fields at once.
 </Aside>
 
 ## Pricing
