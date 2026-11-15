@@ -63,7 +63,7 @@ Set `question_language` to get questions in a different language from the passag
 - **English or French passage → 30 widely spoken languages:** Afrikaans, Amharic, Arabic, Bengali, Chinese, Dutch, German, Hausa, Hindi, Igbo, Indonesian, Italian, Japanese, Korean, Persian, Polish, Portuguese, Russian, Somali, Spanish, Swahili, Tamil, Telugu, Thai, Turkish, Ukrainian, Urdu, Vietnamese, Yoruba and Zulu.
 - **Between any two of those 30**, such as Swahili → Hindi.
 
-Other directions return `400` with the reason.
+Other directions return `400` with the reason. Each cross-lingual question is checked with language ID: one the model wrote in the passage's language or in English instead is removed, `warnings` says so, and you aren't charged for it.
 
 ```python
 r = call("/v1/questions/generate", {
