@@ -36,7 +36,7 @@ def call(path, body):
 
 
 def paragraphs(text):
-    # Question generation works best on paragraph-sized passages (up to 8,000 characters).
+    # One call per paragraph, so each FAQ entry links back to the paragraph that answers it.
     return [p.strip() for p in text.split("\n\n") if len(p.strip()) > 80]
 
 

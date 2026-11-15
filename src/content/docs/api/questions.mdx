@@ -23,8 +23,8 @@ print(r["questions"])
 
 | Field | Default | Notes |
 | --- | --- | --- |
-| `passage` | required | 1 to 8,000 characters. Works best at paragraph length, up to about 2,000 characters; split longer documents into passages. |
-| `n` | `3` | How many questions: 1 to 5, or `"auto"` to let the model write as many as the passage supports (usually about two). Values up to 10 are accepted and capped at 5. |
+| `passage` | required | 1 to 100,000 characters. A passage over about 2,000 characters is split into chunks of that size, and the questions are spread over them: see [Long passages](#long-passages). |
+| `n` | `3` | How many questions: 1 to 100 (at most 5 per 2,000 characters of passage), or `"auto"` to let the model write as many as the passage supports (usually about two per 2,000 characters). |
 | `language` | detected | Optional. The passage's language, as a name or code: `yor`, `yo` or `Yoruba`. Detected for you when left out. |
 | `question_language` | the passage's | Optional. Write the questions in another language: see [Cross-lingual questions](#cross-lingual-questions). |
 
@@ -36,14 +36,24 @@ print(r["questions"])
  "usage": {"input_tokens": 96, "output_tokens": 27, "generations": 1}}
 ```
 
-`language` is the passage's language and `question_language` the questions'. `warnings` flags a very short or very long passage, a passage whose language couldn't be told, a count above 5, or a passage that supports fewer distinct questions than you asked for.
+`language` is the passage's language and `question_language` the questions'. `warnings` flags a very short passage, a passage whose language couldn't be told, a count above what the passage's length allows, or a passage that supports fewer distinct questions than you asked for.
 
 ## How many questions
 
-- **A number, across languages:** the model writes exactly that many, from 1 to 5 (fewer reach you only if some were repeats).
+- **A number, across languages:** the model writes exactly that many (fewer reach you only if some were repeats).
 - **A number, in the passage's own language:** it's a maximum. A short passage that only supports two good questions gives two, not five padded ones, and `warnings` says so.
 - **`"auto"`:** the model decides from the passage. Use it when every question must be one the text really answers, such as training pairs.
 - **Repeats are removed.** If the model writes the same question twice, or two near-identical versions of it, you get it once, `warnings` says so, and you aren't charged for the removed ones.
+
+## Long passages
+
+Send a whole article, chapter or report section, up to 100,000 characters. The model writes its best questions on about 2,000 characters at a time, so a longer passage is split into chunks of about that size at paragraph or sentence breaks, all generated together in one call:
+
+- **A number** is spread over the chunks in proportion to their length, at most 5 per chunk, so the questions cover the whole passage. With fewer questions than chunks, they come from chunks spread evenly through it.
+- **`"auto"`** lets each chunk give as many as it supports.
+- **Repeats across chunks** are removed once, and you aren't charged for them.
+
+The questions come back in passage order. A batch takes up to 200,000 characters in all.
 
 ## Cross-lingual questions
 
